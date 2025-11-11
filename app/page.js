@@ -190,10 +190,10 @@ export default function LandingPage() {
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-4xl font-bold text-gray-900 mb-4">
-                AI-Powered Campaign Tracking + Complete CRM
+                Professional Dashboard + Complete CRM
               </h2>
               <p className="text-xl text-gray-600">
-                Track every campaign, every lead, every dollar. Our AI connects all your marketing in one place.
+                Track every lead, every job, every dollar. Everything you need to run your garage door business.
               </p>
             </div>
 
@@ -294,25 +294,25 @@ export default function LandingPage() {
             <div className="grid md:grid-cols-3 gap-8">
               <div className="bg-white rounded-xl shadow-lg p-8 text-center">
                 <div className="text-5xl font-bold text-blue-600 mb-4">1</div>
-                <h3 className="text-xl font-bold mb-3">Connect Your Campaigns</h3>
+                <h3 className="text-xl font-bold mb-3">Set Your Daily Lead Cap</h3>
                 <p className="text-gray-600">
-                  Link your Google Ads, Facebook ads, website forms - whatever you're running. Our AI tracks it all.
+                  Create your campaign in the GarageLeadly dashboard. Set your daily lead cap. We handle all the advertising.
                 </p>
               </div>
 
               <div className="bg-white rounded-xl shadow-lg p-8 text-center">
                 <div className="text-5xl font-bold text-green-600 mb-4">2</div>
-                <h3 className="text-xl font-bold mb-3">Instant SMS Delivery</h3>
+                <h3 className="text-xl font-bold mb-3">Get Instant Leads</h3>
                 <p className="text-gray-600">
-                  Customer fills form → You get SMS in 0.5 seconds. Nobody else sees it. Ever. 100% private to you.
+                  Homeowner needs help → You get SMS in 0.5 seconds. Exclusive to you. Nobody else sees it. Ever.
                 </p>
               </div>
 
               <div className="bg-white rounded-xl shadow-lg p-8 text-center">
                 <div className="text-5xl font-bold text-purple-600 mb-4">3</div>
-                <h3 className="text-xl font-bold mb-3">Track Everything</h3>
+                <h3 className="text-xl font-bold mb-3">Fix Garages, Make Money</h3>
                 <p className="text-gray-600">
-                  See which campaigns convert. Measure ROI. Track lead to job. All in one dashboard.
+                  Call the customer. Fix their garage. Track jobs and revenue in your dashboard. Simple as that.
                 </p>
               </div>
             </div>
