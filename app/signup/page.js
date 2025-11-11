@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
+import { auth } from '@/lib/auth';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -27,7 +27,7 @@ export default function SignupPage() {
     });
   };
 
-  const handleSignup = async (e) => {
+  const handleSignup = (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
@@ -39,52 +39,22 @@ export default function SignupPage() {
       return;
     }
 
-    try {
-      // Create auth user
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-      });
+    const result = auth.signup({
+      companyName: formData.companyName,
+      email: formData.email,
+      phone: formData.phone,
+      password: formData.password,
+      county: formData.county,
+      dailyBudget: formData.dailyBudget,
+    });
 
-      if (authError) throw authError;
-
-      // Create member record
-      const { error: memberError } = await supabase
-        .from('members')
-        .insert([
-          {
-            id: authData.user.id,
-            company_name: formData.companyName,
-            email: formData.email,
-            phone: formData.phone,
-            status: 'pending',
-            membership_fee: 500, // Founding member rate
-          },
-        ]);
-
-      if (memberError) throw memberError;
-
-      // Create territory record
-      const { error: territoryError } = await supabase
-        .from('territories')
-        .insert([
-          {
-            member_id: authData.user.id,
-            county: formData.county,
-            daily_budget: formData.dailyBudget,
-            spent_today: 0,
-          },
-        ]);
-
-      if (territoryError) throw territoryError;
-
-      // Redirect to payment/onboarding
-      router.push('/dashboard?welcome=true');
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
+    if (result.success) {
+      router.push('/dashboard');
+    } else {
+      setError(result.error);
     }
+
+    setLoading(false);
   };
 
   return (
