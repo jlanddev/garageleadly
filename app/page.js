@@ -69,9 +69,10 @@ export default function LandingPage() {
             Houston Launch - First 20 Contractors Only
           </div>
           <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-            Stop Competing.<br />
+            Exclusive Garage Door Leads.<br />
+            Your Territory.{' '}
             <span className="bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
-              Start Winning.
+              No Competition.
             </span>
           </h1>
           <p className="text-2xl text-gray-600 mb-4 max-w-3xl mx-auto">
