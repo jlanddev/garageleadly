@@ -2,11 +2,13 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
 // Contractor signup form
 
 export default function SignupPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     companyName: '',
     contactName: '',
@@ -48,13 +50,16 @@ export default function SignupPage() {
           setSubmitting(false);
           return;
         }
+
+        // Success - redirect to thank you page
+        router.push('/signup/thank-you');
+        return;
       } catch (err) {
         console.error('Error:', err);
         alert('Error: ' + (err.message || 'Please try again'));
         setSubmitting(false);
         return;
       }
-      setSubmitting(false);
     }
     setStep(step + 1);
   };
