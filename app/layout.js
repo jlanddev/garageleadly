@@ -1,5 +1,5 @@
 import './globals.css'
-import Script from 'next/script'
+import FacebookPixel from './components/FacebookPixel'
 
 export const metadata = {
   title: 'GarageLeadly - Exclusive Garage Door Leads',
@@ -9,10 +9,8 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body>
-        <Script
-          id="facebook-pixel"
-          strategy="beforeInteractive"
+      <head>
+        <script
           dangerouslySetInnerHTML={{
             __html: `
               !function(f,b,e,v,n,t,s)
@@ -28,15 +26,9 @@ export default function RootLayout({ children }) {
             `,
           }}
         />
-        <noscript>
-          <img
-            height="1"
-            width="1"
-            style={{display:'none'}}
-            src="https://www.facebook.com/tr?id=2075771389856703&ev=PageView&noscript=1"
-            alt=""
-          />
-        </noscript>
+      </head>
+      <body>
+        <FacebookPixel />
         {children}
       </body>
     </html>
