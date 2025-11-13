@@ -9,7 +9,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <head>
+      <body>
         <Script id="facebook-pixel" strategy="afterInteractive">
           {`
             !function(f,b,e,v,n,t,s)
@@ -29,8 +29,8 @@ export default function RootLayout({ children }) {
           src="https://www.facebook.com/tr?id=2075771389856703&ev=PageView&noscript=1"
           />
         </noscript>
-      </head>
-      <body>{children}</body>
+        {children}
+      </body>
     </html>
   )
 }
