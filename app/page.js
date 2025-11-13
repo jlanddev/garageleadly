@@ -49,7 +49,7 @@ export default function LandingPage() {
       <header className="container mx-auto px-4 py-6">
         <div className="flex justify-between items-center">
           <Link href="/">
-            <img src="/logo.png" alt="GarageLeadly" className="h-12 md:h-16" />
+            <img src="/logo.png" alt="GarageLeadly" className="h-16 md:h-20" />
           </Link>
           <Link
             href="/login"
@@ -60,27 +60,71 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* Hero Section with Live Lead Example */}
+      {/* Hero Section */}
       <section className="container mx-auto px-4 py-12">
-        <div className="text-center mb-8">
+        <div className="text-center mb-12">
           <div className="inline-block bg-gradient-to-r from-blue-600 to-green-600 text-white px-6 py-2 rounded-full text-sm font-semibold mb-6 animate-pulse">
             Houston Launch - First 20 Contractors Only
           </div>
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-            Exclusive Garage Door Leads.<br />
-            Your Territory.{' '}
+          <h1 className="text-5xl md:text-7xl font-black text-gray-900 mb-6 leading-tight">
+            Stop Fighting For Leads.<br />
             <span className="bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
-              No Competition.
+              Get Them Delivered.
             </span>
           </h1>
-          <p className="text-2xl text-gray-600 mb-4 max-w-3xl mx-auto">
-            Your leads. Your campaigns. <span className="font-bold text-green-600">INSTANTLY</span> to your phone.<br/>
-            No middlemen. No sharing. Nobody else ever sees them.
+          <p className="text-2xl md:text-3xl text-gray-700 mb-8 max-w-4xl mx-auto font-semibold">
+            100% exclusive garage door leads sent to your phone in 30 seconds.<br/>
+            <span className="text-gray-600 font-normal">Territory-protected. No sharing. No competition.</span>
           </p>
         </div>
 
+        {/* How It Works - Horizontal Bars */}
+        <div className="max-w-6xl mx-auto mb-12 space-y-4">
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-2xl p-6 shadow-xl hover:shadow-2xl transition">
+            <div className="flex items-center gap-6">
+              <div className="flex-shrink-0 w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center">
+                <span className="text-4xl font-black">1</span>
+              </div>
+              <div>
+                <h3 className="text-2xl font-bold mb-2">We Run The Ads, You Get The Calls</h3>
+                <p className="text-blue-100 text-lg">
+                  Set your daily lead cap in the dashboard. We handle all the advertising, landing pages, and customer screening. You just answer the phone.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-r from-green-600 to-green-700 text-white rounded-2xl p-6 shadow-xl hover:shadow-2xl transition">
+            <div className="flex items-center gap-6">
+              <div className="flex-shrink-0 w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center">
+                <span className="text-4xl font-black">2</span>
+              </div>
+              <div>
+                <h3 className="text-2xl font-bold mb-2">Exclusive Leads Delivered in 30 Seconds</h3>
+                <p className="text-green-100 text-lg">
+                  Every lead is 100% exclusive to you. SMS hits your phone instantly with customer's name, number, address, and issue. Nobody else ever sees it.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-2xl p-6 shadow-xl hover:shadow-2xl transition">
+            <div className="flex items-center gap-6">
+              <div className="flex-shrink-0 w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center">
+                <span className="text-4xl font-black">3</span>
+              </div>
+              <div>
+                <h3 className="text-2xl font-bold mb-2">Close Jobs, Track Everything, Scale Up</h3>
+                <p className="text-purple-100 text-lg">
+                  Fix garages and make money. Track every lead, job, and dollar in your dashboard. See your ROI. Adjust your daily cap. Total control.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Live Lead Demo */}
-        <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-8 items-center mb-12">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center mb-12">
           {/* Left: SMS Preview */}
           <div className="relative">
             <div className="absolute -top-4 -left-4 bg-green-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg animate-bounce">
@@ -279,42 +323,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Quick Comparison */}
-      <section className="bg-gray-50 py-20">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
-              How GarageLeadly Works
-            </h2>
-
-            <div className="grid md:grid-cols-3 gap-8">
-              <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-                <div className="text-5xl font-bold text-blue-600 mb-4">1</div>
-                <h3 className="text-xl font-bold mb-3">Set Your Daily Lead Cap</h3>
-                <p className="text-gray-600">
-                  Create your campaign in the GarageLeadly dashboard. Set your daily lead cap. We handle all the advertising.
-                </p>
-              </div>
-
-              <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-                <div className="text-5xl font-bold text-green-600 mb-4">2</div>
-                <h3 className="text-xl font-bold mb-3">Get Instant Leads</h3>
-                <p className="text-gray-600">
-                  Homeowner needs help → You get SMS in 0.5 seconds. Exclusive to you. Nobody else sees it. Ever.
-                </p>
-              </div>
-
-              <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-                <div className="text-5xl font-bold text-purple-600 mb-4">3</div>
-                <h3 className="text-xl font-bold mb-3">Fix Garages, Make Money</h3>
-                <p className="text-gray-600">
-                  Call the customer. Fix their garage. Track jobs and revenue in your dashboard. Simple as that.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Why Join */}
       <section className="py-20">
