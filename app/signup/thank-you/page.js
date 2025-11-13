@@ -88,135 +88,101 @@ export default function ThankYouPage() {
 
   if (bookingComplete) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 relative overflow-hidden">
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-green-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-        </div>
+      <div className="min-h-screen bg-black">
+        <div className="max-w-4xl mx-auto px-4 py-20">
+          <div className="bg-gradient-to-br from-green-600/20 to-emerald-600/20 border-l-4 border-green-500 p-12 mb-8">
+            <div className="max-w-2xl">
+              <h1 className="text-5xl font-black text-white mb-6 leading-tight">
+                Call Confirmed
+              </h1>
+              <p className="text-xl text-gray-300 mb-2">
+                {selectedDate?.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+              </p>
+              <p className="text-2xl text-white font-bold">
+                {selectedTime} CST
+              </p>
+            </div>
+          </div>
 
-        <div className="relative z-10 min-h-screen py-12 px-4 flex items-center justify-center">
-          <div className="max-w-2xl mx-auto text-center">
-            <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-green-400 to-emerald-600 rounded-full mb-6 shadow-2xl">
-              <svg className="w-14 h-14 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-              </svg>
+          <div className="grid md:grid-cols-3 gap-6 mb-12">
+            <div className="bg-zinc-900 p-6 border-l-2 border-blue-500">
+              <div className="text-blue-400 text-sm font-mono mb-2">STEP 1</div>
+              <h3 className="text-white font-bold mb-2">Check Your Email</h3>
+              <p className="text-gray-400 text-sm">Calendar invite sent to {bookingData?.email}</p>
             </div>
 
-            <h1 className="text-5xl md:text-6xl font-black text-white mb-4 tracking-tight">
-              Call Confirmed!
-            </h1>
-            <p className="text-2xl text-blue-200 font-light mb-8">
-              We'll see you on {selectedDate?.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} at {selectedTime}
-            </p>
-
-            <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 shadow-2xl mb-8">
-              <h3 className="text-xl font-bold text-white mb-4">What to Expect</h3>
-              <ul className="text-left text-blue-200 space-y-3">
-                <li className="flex items-start gap-3">
-                  <span className="text-green-400 text-xl">✓</span>
-                  <span>We'll send a calendar invite to your email</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-green-400 text-xl">✓</span>
-                  <span>We'll call you at the scheduled time</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-green-400 text-xl">✓</span>
-                  <span>Bring any questions about leads, territory, or the platform</span>
-                </li>
-              </ul>
+            <div className="bg-zinc-900 p-6 border-l-2 border-purple-500">
+              <div className="text-purple-400 text-sm font-mono mb-2">STEP 2</div>
+              <h3 className="text-white font-bold mb-2">We'll Call You</h3>
+              <p className="text-gray-400 text-sm">At exactly {selectedTime} on the scheduled date</p>
             </div>
 
+            <div className="bg-zinc-900 p-6 border-l-2 border-green-500">
+              <div className="text-green-400 text-sm font-mono mb-2">STEP 3</div>
+              <h3 className="text-white font-bold mb-2">Get Activated</h3>
+              <p className="text-gray-400 text-sm">Start receiving leads within 24 hours</p>
+            </div>
+          </div>
+
+          <div className="text-center">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 text-blue-300 hover:text-white transition-colors font-medium"
+              className="text-gray-400 hover:text-white underline"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              Back to Home
+              Return to homepage
             </Link>
           </div>
         </div>
-
-        <style jsx>{`
-          @keyframes blob {
-            0% { transform: translate(0px, 0px) scale(1); }
-            33% { transform: translate(30px, -50px) scale(1.1); }
-            66% { transform: translate(-20px, 20px) scale(0.9); }
-            100% { transform: translate(0px, 0px) scale(1); }
-          }
-          .animate-blob {
-            animation: blob 7s infinite;
-          }
-          .animation-delay-2000 {
-            animation-delay: 2s;
-          }
-        `}</style>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-green-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
-      </div>
-
-      <div className="relative z-10 min-h-screen py-12 px-4 flex items-center">
-        <div className="max-w-6xl mx-auto w-full">
-          {/* Success Message Section */}
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-green-400 to-emerald-600 rounded-full mb-6 shadow-2xl animate-bounce-slow">
-              <svg className="w-14 h-14 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-
-            <h1 className="text-5xl md:text-7xl font-black text-white mb-4 tracking-tight">
-              Welcome to the Network
-            </h1>
-            <p className="text-2xl md:text-3xl text-blue-200 font-light mb-8">
-              You're one step away from exclusive leads
-            </p>
-
-            <div className="flex items-center justify-center gap-3 text-green-400 font-semibold text-lg">
-              <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-              Application Received
-            </div>
+    <div className="min-h-screen bg-black">
+      <div className="max-w-7xl mx-auto px-4 py-12">
+        {/* Header */}
+        <div className="mb-16">
+          <div className="inline-block bg-green-500/10 border border-green-500/30 px-4 py-1 rounded mb-6">
+            <span className="text-green-400 text-sm font-mono">APPLICATION RECEIVED</span>
           </div>
+          <h1 className="text-6xl md:text-8xl font-black text-white mb-6 leading-none">
+            Welcome to<br/>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-green-400">
+              GarageLeadly
+            </span>
+          </h1>
+          <p className="text-2xl text-gray-400 max-w-2xl">
+            Book your strategy call below to discuss your territory, pricing, and start date.
+          </p>
+        </div>
 
-          {/* Main Content Grid */}
-          <div className="grid lg:grid-cols-2 gap-8 items-start">
-            {/* Left: Calendar Booking */}
-            <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 shadow-2xl">
-              <div className="mb-6">
-                <h2 className="text-3xl font-bold text-white mb-2">
-                  Book Your Strategy Call
-                </h2>
-                <p className="text-blue-200">
-                  Choose a time that works for you. We'll discuss your territory, lead goals, and get you set up.
-                </p>
-              </div>
+        {/* Main Grid */}
+        <div className="grid lg:grid-cols-5 gap-8">
+          {/* Calendar - Takes up 3 columns */}
+          <div className="lg:col-span-3">
+            <div className="bg-zinc-900 border border-zinc-800 p-8">
+              <h2 className="text-2xl font-bold text-white mb-8">Schedule Your Call</h2>
 
               {/* Date Selection */}
-              <div className="mb-6">
-                <h3 className="text-white font-semibold mb-3">Select a Date</h3>
-                <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto">
+              <div className="mb-8">
+                <label className="text-white font-mono text-sm mb-4 block">SELECT DATE</label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {availableDates.map((date, idx) => (
                     <button
                       key={idx}
                       onClick={() => setSelectedDate(date)}
-                      className={`p-3 rounded-lg text-sm font-medium transition ${
+                      className={`p-4 text-left border transition-all ${
                         selectedDate?.toDateString() === date.toDateString()
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-white/10 text-white hover:bg-white/20'
+                          ? 'bg-blue-600 border-blue-500 text-white'
+                          : 'bg-black border-zinc-800 text-gray-400 hover:border-zinc-700'
                       }`}
                     >
-                      {date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                      <div className="text-xs font-mono opacity-70">
+                        {date.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase()}
+                      </div>
+                      <div className="text-lg font-bold">
+                        {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      </div>
                     </button>
                   ))}
                 </div>
@@ -224,17 +190,17 @@ export default function ThankYouPage() {
 
               {/* Time Selection */}
               {selectedDate && (
-                <div className="mb-6">
-                  <h3 className="text-white font-semibold mb-3">Select a Time (CST)</h3>
-                  <div className="grid grid-cols-3 gap-2 max-h-64 overflow-y-auto">
+                <div className="mb-8">
+                  <label className="text-white font-mono text-sm mb-4 block">SELECT TIME (CST)</label>
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                     {timeSlots.map((time, idx) => (
                       <button
                         key={idx}
                         onClick={() => setSelectedTime(time)}
-                        className={`p-2 rounded-lg text-xs font-medium transition ${
+                        className={`p-3 text-sm border transition-all ${
                           selectedTime === time
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-white/10 text-white hover:bg-white/20'
+                            ? 'bg-blue-600 border-blue-500 text-white font-bold'
+                            : 'bg-black border-zinc-800 text-gray-400 hover:border-zinc-700'
                         }`}
                       >
                         {time}
@@ -244,140 +210,69 @@ export default function ThankYouPage() {
                 </div>
               )}
 
-              {/* Book Button */}
+              {/* Confirm Button */}
               <button
                 onClick={handleBookCall}
                 disabled={!selectedDate || !selectedTime}
-                className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 rounded-xl font-bold text-lg hover:from-green-600 hover:to-emerald-700 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-xl"
+                className="w-full bg-gradient-to-r from-blue-600 to-green-600 text-white py-5 font-bold text-lg hover:from-blue-700 hover:to-green-700 transition disabled:opacity-30 disabled:cursor-not-allowed"
               >
-                {selectedDate && selectedTime ? 'Confirm Your Call' : 'Select Date & Time'}
+                {selectedDate && selectedTime ? 'CONFIRM YOUR CALL' : 'SELECT DATE & TIME FIRST'}
               </button>
-            </div>
-
-            {/* Right: What Happens Next */}
-            <div className="space-y-6">
-              {/* Timeline Card */}
-              <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-3xl p-8 border border-blue-400/30 shadow-2xl">
-                <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-                  <span className="text-3xl">⚡</span>
-                  Your Next Steps
-                </h3>
-
-                <div className="space-y-6">
-                  <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-white font-bold text-lg">
-                      1
-                    </div>
-                    <div>
-                      <h4 className="text-white font-bold text-lg mb-1">Schedule Your Call</h4>
-                      <p className="text-blue-100">Pick a time that works for you. We'll send a calendar invite.</p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-white font-bold text-lg">
-                      2
-                    </div>
-                    <div>
-                      <h4 className="text-white font-bold text-lg mb-1">Territory Confirmation</h4>
-                      <p className="text-blue-100">We'll verify your county is available and discuss lead volume.</p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-white font-bold text-lg">
-                      3
-                    </div>
-                    <div>
-                      <h4 className="text-white font-bold text-lg mb-1">Get Activated</h4>
-                      <p className="text-blue-100">If we're a fit, we'll set up your dashboard and start sending leads immediately.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Stats Preview Card */}
-              <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 shadow-2xl">
-                <h3 className="text-xl font-bold text-white mb-4">What Our Network Achieves</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center">
-                    <div className="text-4xl font-black text-green-400 mb-1">68%</div>
-                    <div className="text-sm text-blue-200">Avg Close Rate</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-4xl font-black text-green-400 mb-1">4.2x</div>
-                    <div className="text-sm text-blue-200">Avg ROI</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-4xl font-black text-green-400 mb-1">&lt;30s</div>
-                    <div className="text-sm text-blue-200">Lead Delivery</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-4xl font-black text-green-400 mb-1">100%</div>
-                    <div className="text-sm text-blue-200">Exclusive</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Contact Card */}
-              <div className="bg-gradient-to-br from-purple-600 to-purple-700 rounded-3xl p-6 border border-purple-400/30 shadow-2xl text-center">
-                <p className="text-purple-100 mb-2">Questions before your call?</p>
-                <p className="text-white font-bold text-lg">We're here to help</p>
-              </div>
             </div>
           </div>
 
-          {/* Footer Link */}
-          <div className="text-center mt-12">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 text-blue-300 hover:text-white transition-colors font-medium"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              Back to Home
-            </Link>
+          {/* Sidebar - Takes up 2 columns */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* What We'll Cover */}
+            <div className="bg-zinc-900 border border-zinc-800 p-8">
+              <h3 className="text-white font-bold text-lg mb-6">On This Call</h3>
+              <div className="space-y-4">
+                <div className="border-l-2 border-blue-500 pl-4">
+                  <div className="text-white font-bold mb-1">Territory Confirmation</div>
+                  <div className="text-gray-400 text-sm">Verify your county is available and discuss competition</div>
+                </div>
+                <div className="border-l-2 border-purple-500 pl-4">
+                  <div className="text-white font-bold mb-1">Lead Volume Discussion</div>
+                  <div className="text-gray-400 text-sm">Set your daily lead cap and budget expectations</div>
+                </div>
+                <div className="border-l-2 border-green-500 pl-4">
+                  <div className="text-white font-bold mb-1">Platform Walkthrough</div>
+                  <div className="text-gray-400 text-sm">See the dashboard, CRM, and SMS notifications</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Stats */}
+            <div className="bg-gradient-to-br from-blue-600/10 to-green-600/10 border border-blue-500/30 p-8">
+              <h3 className="text-white font-bold text-lg mb-6">Network Performance</h3>
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <div className="text-4xl font-black text-white mb-1">68%</div>
+                  <div className="text-gray-400 text-sm">Average Close Rate</div>
+                </div>
+                <div>
+                  <div className="text-4xl font-black text-white mb-1">4.2x</div>
+                  <div className="text-gray-400 text-sm">Average ROI</div>
+                </div>
+                <div>
+                  <div className="text-4xl font-black text-white mb-1">30s</div>
+                  <div className="text-gray-400 text-sm">Lead Delivery Time</div>
+                </div>
+                <div>
+                  <div className="text-4xl font-black text-white mb-1">100%</div>
+                  <div className="text-gray-400 text-sm">Exclusive Leads</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Contact */}
+            <div className="bg-zinc-900 border border-zinc-800 p-6 text-center">
+              <p className="text-gray-400 text-sm mb-1">Questions before the call?</p>
+              <p className="text-white font-bold">Contact us anytime</p>
+            </div>
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        @keyframes blob {
-          0% {
-            transform: translate(0px, 0px) scale(1);
-          }
-          33% {
-            transform: translate(30px, -50px) scale(1.1);
-          }
-          66% {
-            transform: translate(-20px, 20px) scale(0.9);
-          }
-          100% {
-            transform: translate(0px, 0px) scale(1);
-          }
-        }
-        .animate-blob {
-          animation: blob 7s infinite;
-        }
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-        .animation-delay-4000 {
-          animation-delay: 4s;
-        }
-        @keyframes bounce-slow {
-          0%, 100% {
-            transform: translateY(0);
-          }
-          50% {
-            transform: translateY(-10px);
-          }
-        }
-        .animate-bounce-slow {
-          animation: bounce-slow 2s ease-in-out infinite;
-        }
-      `}</style>
     </div>
   );
 }
