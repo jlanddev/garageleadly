@@ -221,18 +221,12 @@ export default function SignupPage() {
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg"
                 >
                   <option value="">Choose your county...</option>
-                  <option value="Harris">Harris County (Houston)</option>
-                  <option value="Fort Bend">Fort Bend County</option>
-                  <option value="Montgomery">Montgomery County</option>
-                  <option value="Galveston">Galveston County</option>
-                  <option value="Brazoria">Brazoria County</option>
-                  <option value="Williamson">Williamson County (Austin)</option>
-                  <option value="Travis">Travis County (Austin)</option>
-                  <option value="Bexar">Bexar County (San Antonio)</option>
-                  <option value="Dallas">Dallas County</option>
-                  <option value="Tarrant">Tarrant County (Fort Worth)</option>
-                  <option value="Collin">Collin County</option>
-                  <option value="Denton">Denton County</option>
+                  <option value="Harris">Harris</option>
+                  <option value="Montgomery">Montgomery</option>
+                  <option value="Fort Bend">Fort Bend</option>
+                  <option value="Waller">Waller</option>
+                  <option value="Brazoria">Brazoria</option>
+                  <option value="Liberty">Liberty</option>
                 </select>
               </div>
 
