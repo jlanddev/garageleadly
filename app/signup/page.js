@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { supabase } from '@/lib/supabase';
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
@@ -13,6 +14,7 @@ export default function SignupPage() {
     currentLeads: '',
   });
   const [step, setStep] = useState(1);
+  const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -21,7 +23,37 @@ export default function SignupPage() {
     });
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
+    if (step === 2) {
+      // Save to database when moving to step 3
+      setSubmitting(true);
+      try {
+        const { error } = await supabase
+          .from('contractor_signups')
+          .insert([{
+            company_name: formData.companyName,
+            contact_name: formData.contactName,
+            email: formData.email,
+            phone: formData.phone,
+            county: formData.county,
+            current_leads: formData.currentLeads,
+            status: 'new',
+          }]);
+
+        if (error) {
+          console.error('Error saving signup:', error);
+          alert('There was an error. Please try again.');
+          setSubmitting(false);
+          return;
+        }
+      } catch (err) {
+        console.error('Error:', err);
+        alert('There was an error. Please try again.');
+        setSubmitting(false);
+        return;
+      }
+      setSubmitting(false);
+    }
     setStep(step + 1);
   };
 
@@ -218,75 +250,64 @@ export default function SignupPage() {
                 <button
                   type="button"
                   onClick={() => setStep(1)}
-                  className="flex-1 bg-gray-200 text-gray-700 py-4 rounded-lg font-bold text-lg hover:bg-gray-300 transition"
+                  disabled={submitting}
+                  className="flex-1 bg-gray-200 text-gray-700 py-4 rounded-lg font-bold text-lg hover:bg-gray-300 transition disabled:opacity-50"
                 >
                   ← Back
                 </button>
                 <button
                   type="button"
                   onClick={handleNext}
-                  disabled={!formData.county || !formData.currentLeads}
+                  disabled={!formData.county || !formData.currentLeads || submitting}
                   className="flex-1 bg-blue-600 text-white py-4 rounded-lg font-bold text-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Continue →
+                  {submitting ? 'Saving...' : 'Continue →'}
                 </button>
               </div>
             </div>
           )}
 
-          {/* Step 3: Book Call */}
+          {/* Step 3: Success */}
           {step === 3 && (
-            <div className="space-y-6">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <h3 className="text-2xl font-bold mb-2">Great! Your territory is available</h3>
-                <p className="text-gray-600 text-lg">
-                  Book a 15-minute call to discuss how GarageLeadly works and if it's a fit for your business
+            <div className="space-y-6 text-center py-8">
+              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+
+              <div>
+                <h3 className="text-3xl font-bold mb-3">You're All Set!</h3>
+                <p className="text-xl text-gray-600 mb-6">
+                  We'll reach out within 24 hours to discuss your territory
                 </p>
               </div>
 
-              <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-6">
-                <h4 className="font-bold text-lg mb-3">On this call we'll cover:</h4>
-                <ul className="space-y-2 text-gray-700">
+              <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-6 max-w-md mx-auto text-left">
+                <h4 className="font-bold text-lg mb-3 text-center">What Happens Next?</h4>
+                <ul className="space-y-3 text-gray-700">
                   <li className="flex items-start">
-                    <span className="text-blue-600 mr-2">✓</span>
-                    <span>How the lead delivery system works</span>
+                    <span className="text-blue-600 mr-3 text-xl">1.</span>
+                    <span>We'll review your territory availability</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="text-blue-600 mr-2">✓</span>
-                    <span>Territory exclusivity and lead volume</span>
+                    <span className="text-blue-600 mr-3 text-xl">2.</span>
+                    <span>We'll call you to discuss the program details</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="text-blue-600 mr-2">✓</span>
-                    <span>Pricing and membership options</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-blue-600 mr-2">✓</span>
-                    <span>Answer any questions you have</span>
+                    <span className="text-blue-600 mr-3 text-xl">3.</span>
+                    <span>If it's a fit, we'll get you set up and sending leads!</span>
                   </li>
                 </ul>
               </div>
 
-              {/* Calendly Embed */}
-              <div className="bg-white border-2 border-gray-300 rounded-lg p-4 min-h-[500px] flex items-center justify-center">
-                <div className="text-center text-gray-500">
-                  <p className="mb-4">Calendar booking widget will be embedded here</p>
-                  <p className="text-sm">(Add your Calendly link in the next step)</p>
-                </div>
-              </div>
-
-              <div className="text-center">
-                <button
-                  type="button"
-                  onClick={() => setStep(2)}
-                  className="text-gray-600 hover:text-gray-800"
+              <div className="pt-6">
+                <Link
+                  href="/"
+                  className="inline-block bg-blue-600 text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-blue-700 transition"
                 >
-                  ← Back
-                </button>
+                  Return to Home
+                </Link>
               </div>
             </div>
           )}

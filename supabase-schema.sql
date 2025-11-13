@@ -177,3 +177,28 @@ CREATE POLICY "Contractors can view own transactions" ON transactions
 -- Contractors can view their own daily counts
 CREATE POLICY "Contractors can view own daily counts" ON daily_lead_counts
     FOR SELECT USING (contractor_id = auth.uid());
+
+-- Contractor signup leads table (for sales pipeline)
+CREATE TABLE contractor_signups (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  company_name TEXT NOT NULL,
+  contact_name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  phone TEXT NOT NULL,
+  county TEXT NOT NULL,
+  current_leads TEXT NOT NULL,
+  status TEXT DEFAULT 'new' CHECK (status IN ('new', 'contacted', 'scheduled', 'qualified', 'closed', 'lost')),
+  notes TEXT,
+  submitted_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_contractor_signups_status ON contractor_signups(status);
+CREATE INDEX idx_contractor_signups_submitted ON contractor_signups(submitted_at);
+
+-- Add updated_at trigger
+CREATE TRIGGER update_contractor_signups_updated_at BEFORE UPDATE ON contractor_signups
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Disable RLS for now (we'll add admin auth later)
+ALTER TABLE contractor_signups DISABLE ROW LEVEL SECURITY;
