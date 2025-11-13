@@ -1,24 +1,161 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
 
 export default function ThankYouPage() {
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedTime, setSelectedTime] = useState(null);
+  const [bookingComplete, setBookingComplete] = useState(false);
+  const [bookingData, setBookingData] = useState(null);
+
   useEffect(() => {
     // Google Ads Conversion Tracking
     // TODO: Add your Google Ads conversion tracking code here
-    // Example:
-    // gtag('event', 'conversion', {
-    //   'send_to': 'AW-CONVERSION_ID/CONVERSION_LABEL'
-    // });
 
     // Facebook Pixel Tracking
     // TODO: Add your Facebook Pixel conversion tracking here
-    // Example:
-    // fbq('track', 'Lead');
 
     console.log('Conversion tracking fired - add your tracking codes');
+
+    // Get signup data from localStorage
+    const signupData = localStorage.getItem('garageleadly_latest_signup');
+    if (signupData) {
+      setBookingData(JSON.parse(signupData));
+    }
   }, []);
+
+  // Generate next 14 days
+  const getAvailableDates = () => {
+    const dates = [];
+    const today = new Date();
+
+    for (let i = 1; i <= 14; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() + i);
+
+      // Skip weekends
+      if (date.getDay() !== 0 && date.getDay() !== 6) {
+        dates.push(date);
+      }
+    }
+    return dates;
+  };
+
+  // Available time slots (9 AM - 5 PM, 30 min intervals)
+  const timeSlots = [
+    '9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM',
+    '12:00 PM', '12:30 PM', '1:00 PM', '1:30 PM', '2:00 PM', '2:30 PM',
+    '3:00 PM', '3:30 PM', '4:00 PM', '4:30 PM'
+  ];
+
+  const availableDates = getAvailableDates();
+
+  const handleBookCall = async () => {
+    if (!selectedDate || !selectedTime) {
+      alert('Please select a date and time');
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('calendar_bookings')
+        .insert([{
+          company_name: bookingData?.companyName || 'Unknown',
+          contact_name: bookingData?.contactName || 'Unknown',
+          email: bookingData?.email || '',
+          phone: bookingData?.phone || '',
+          county: bookingData?.county || '',
+          scheduled_date: selectedDate.toISOString().split('T')[0],
+          scheduled_time: selectedTime,
+          status: 'scheduled',
+          booking_type: 'strategy_call'
+        }]);
+
+      if (error) {
+        console.error('Error booking call:', error);
+        alert('Error: ' + error.message);
+        return;
+      }
+
+      setBookingComplete(true);
+    } catch (err) {
+      console.error('Error:', err);
+      alert('Something went wrong. Please try again.');
+    }
+  };
+
+  if (bookingComplete) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 relative overflow-hidden">
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-green-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+        </div>
+
+        <div className="relative z-10 min-h-screen py-12 px-4 flex items-center justify-center">
+          <div className="max-w-2xl mx-auto text-center">
+            <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-green-400 to-emerald-600 rounded-full mb-6 shadow-2xl">
+              <svg className="w-14 h-14 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+
+            <h1 className="text-5xl md:text-6xl font-black text-white mb-4 tracking-tight">
+              Call Confirmed!
+            </h1>
+            <p className="text-2xl text-blue-200 font-light mb-8">
+              We'll see you on {selectedDate?.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} at {selectedTime}
+            </p>
+
+            <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 shadow-2xl mb-8">
+              <h3 className="text-xl font-bold text-white mb-4">What to Expect</h3>
+              <ul className="text-left text-blue-200 space-y-3">
+                <li className="flex items-start gap-3">
+                  <span className="text-green-400 text-xl">✓</span>
+                  <span>We'll send a calendar invite to your email</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-green-400 text-xl">✓</span>
+                  <span>We'll call you at the scheduled time</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-green-400 text-xl">✓</span>
+                  <span>Bring any questions about leads, territory, or the platform</span>
+                </li>
+              </ul>
+            </div>
+
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 text-blue-300 hover:text-white transition-colors font-medium"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Back to Home
+            </Link>
+          </div>
+        </div>
+
+        <style jsx>{`
+          @keyframes blob {
+            0% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0px, 0px) scale(1); }
+          }
+          .animate-blob {
+            animation: blob 7s infinite;
+          }
+          .animation-delay-2000 {
+            animation-delay: 2s;
+          }
+        `}</style>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 relative overflow-hidden">
@@ -65,32 +202,56 @@ export default function ThankYouPage() {
                 </p>
               </div>
 
-              {/* Calendly Embed */}
-              <div className="bg-white rounded-2xl overflow-hidden shadow-xl" style={{ height: '600px' }}>
-                <div className="flex items-center justify-center h-full bg-gradient-to-br from-blue-50 to-blue-100">
-                  <div className="text-center p-8">
-                    <div className="text-4xl mb-4">📅</div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">Calendar Booking</h3>
-                    <p className="text-gray-600 mb-6">Add your Calendly embed code below</p>
-                    <div className="bg-gray-100 rounded-lg p-4 text-left text-sm text-gray-700 font-mono">
-                      <p className="mb-2">To add Calendly:</p>
-                      <p className="text-xs">1. Get your Calendly embed URL</p>
-                      <p className="text-xs">2. Replace this placeholder div</p>
-                      <p className="text-xs">3. Use Calendly inline widget</p>
-                    </div>
+              {/* Date Selection */}
+              <div className="mb-6">
+                <h3 className="text-white font-semibold mb-3">Select a Date</h3>
+                <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto">
+                  {availableDates.map((date, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setSelectedDate(date)}
+                      className={`p-3 rounded-lg text-sm font-medium transition ${
+                        selectedDate?.toDateString() === date.toDateString()
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-white/10 text-white hover:bg-white/20'
+                      }`}
+                    >
+                      {date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Time Selection */}
+              {selectedDate && (
+                <div className="mb-6">
+                  <h3 className="text-white font-semibold mb-3">Select a Time (CST)</h3>
+                  <div className="grid grid-cols-3 gap-2 max-h-64 overflow-y-auto">
+                    {timeSlots.map((time, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setSelectedTime(time)}
+                        className={`p-2 rounded-lg text-xs font-medium transition ${
+                          selectedTime === time
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-white/10 text-white hover:bg-white/20'
+                        }`}
+                      >
+                        {time}
+                      </button>
+                    ))}
                   </div>
                 </div>
-                {/*
-                  REPLACE THE ABOVE DIV WITH YOUR CALENDLY EMBED:
+              )}
 
-                  <iframe
-                    src="https://calendly.com/YOUR-LINK"
-                    width="100%"
-                    height="100%"
-                    frameBorder="0"
-                  ></iframe>
-                */}
-              </div>
+              {/* Book Button */}
+              <button
+                onClick={handleBookCall}
+                disabled={!selectedDate || !selectedTime}
+                className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 rounded-xl font-bold text-lg hover:from-green-600 hover:to-emerald-700 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-xl"
+              >
+                {selectedDate && selectedTime ? 'Confirm Your Call' : 'Select Date & Time'}
+              </button>
             </div>
 
             {/* Right: What Happens Next */}

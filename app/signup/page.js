@@ -51,6 +51,9 @@ export default function SignupPage() {
           return;
         }
 
+        // Save to localStorage for thank you page
+        localStorage.setItem('garageleadly_latest_signup', JSON.stringify(formData));
+
         // Success - redirect to thank you page
         router.push('/signup/thank-you');
         return;
