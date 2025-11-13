@@ -9,6 +9,7 @@ export default function AdminPage() {
   const [contractors, setContractors] = useState([]);
   const [signups, setSignups] = useState([]);
   const [transactions, setTransactions] = useState([]);
+  const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -26,17 +27,19 @@ export default function AdminPage() {
     // Fetch leads from today
     const today = new Date().toISOString().split('T')[0];
 
-    const [leadsRes, contractorsRes, signupsRes, transactionsRes] = await Promise.all([
+    const [leadsRes, contractorsRes, signupsRes, transactionsRes, bookingsRes] = await Promise.all([
       supabase.from('leads').select('*').gte('submitted_at', today + 'T00:00:00').order('submitted_at', { ascending: false }),
       supabase.from('contractors').select('*').eq('status', 'active'),
       supabase.from('contractor_signups').select('*').order('submitted_at', { ascending: false }).limit(20),
       supabase.from('transactions').select('*').gte('created_at', today + 'T00:00:00').eq('type', 'lead_charge'),
+      supabase.from('calendar_bookings').select('*').order('scheduled_date', { ascending: true }).limit(50),
     ]);
 
     setLeads(leadsRes.data || []);
     setContractors(contractorsRes.data || []);
     setSignups(signupsRes.data || []);
     setTransactions(transactionsRes.data || []);
+    setBookings(bookingsRes.data || []);
     setLoading(false);
   };
 
@@ -317,10 +320,65 @@ export default function AdminPage() {
 
         {/* CALENDAR TAB */}
         {activeTab === 'calendar' && (
-          <div className="bg-gray-800 rounded-lg p-6">
-            <h3 className="text-xl font-bold mb-4">Scheduled Sales Calls</h3>
-            <div className="text-gray-400 text-center py-12">
-              Calendar booking system coming next...
+          <div className="bg-gray-800 rounded-lg overflow-hidden">
+            <div className="p-4 border-b border-gray-700">
+              <h3 className="text-xl font-bold">Scheduled Sales Calls</h3>
+              <p className="text-sm text-gray-400 mt-1">{bookings.length} upcoming calls</p>
+            </div>
+            <div className="overflow-x-auto">
+              {bookings.length === 0 ? (
+                <div className="text-center py-12 text-gray-400">
+                  No scheduled calls yet
+                </div>
+              ) : (
+                <table className="w-full">
+                  <thead className="bg-gray-700">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Date & Time</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Company</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Contact</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">County</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-700">
+                    {bookings.map((booking) => {
+                      const bookingDate = new Date(booking.scheduled_date);
+                      const isToday = bookingDate.toDateString() === new Date().toDateString();
+                      const isPast = bookingDate < new Date();
+
+                      return (
+                        <tr key={booking.id} className={`hover:bg-gray-700 ${isToday ? 'bg-blue-900/30' : ''}`}>
+                          <td className="px-6 py-4">
+                            <div className="font-medium">{bookingDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</div>
+                            <div className="text-sm text-blue-400">{booking.scheduled_time}</div>
+                            {isToday && <div className="text-xs text-green-400 font-semibold mt-1">TODAY</div>}
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="font-medium">{booking.company_name}</div>
+                            <div className="text-sm text-gray-400">{booking.email}</div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div>{booking.contact_name}</div>
+                            <div className="text-sm text-blue-400">{booking.phone}</div>
+                          </td>
+                          <td className="px-6 py-4 text-sm">{booking.county}</td>
+                          <td className="px-6 py-4">
+                            <span className={`px-3 py-1 rounded-full text-xs font-semibold capitalize ${
+                              booking.status === 'scheduled' ? 'bg-blue-600' :
+                              booking.status === 'completed' ? 'bg-green-600' :
+                              booking.status === 'cancelled' ? 'bg-red-600' :
+                              'bg-gray-600'
+                            }`}>
+                              {booking.status}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
             </div>
           </div>
         )}
