@@ -20,8 +20,7 @@ export default function LandingPage() {
       city: "Houston",
       zip: "77084",
       county: "Harris County",
-      issue: "Garage door won't close - sensor keeps beeping",
-      price: "45"
+      issue: "Garage door won't close - sensor keeps beeping"
     },
     {
       name: "Sarah Thompson",
@@ -31,8 +30,7 @@ export default function LandingPage() {
       city: "Sugar Land",
       zip: "77479",
       county: "Fort Bend County",
-      issue: "Spring broke this morning, door stuck halfway",
-      price: "42"
+      issue: "Spring broke this morning, door stuck halfway"
     }
   ];
 
@@ -92,7 +90,7 @@ export default function LandingPage() {
               <div className="text-xs text-gray-500 mb-4">SMS to (832) 555-YOUR-PHONE</div>
               <div className={`transition-opacity duration-1000 ${showLead ? 'opacity-100' : 'opacity-0'}`}>
                 <div className="bg-blue-600 text-white p-6 rounded-2xl rounded-bl-none shadow-lg">
-                  <div className="text-sm font-semibold mb-4">🔧 NEW EXCLUSIVE LEAD - ${sampleLeads[currentLead].price}</div>
+                  <div className="text-sm font-semibold mb-4">🔧 NEW EXCLUSIVE LEAD</div>
 
                   <div className="space-y-3">
                     <div className="flex items-start">
@@ -176,11 +174,8 @@ export default function LandingPage() {
               Book Your Call
             </Link>
           </div>
-          <p className="text-gray-600 mt-4">
-            $1,200/year membership + $40-50 per lead
-          </p>
-          <p className="text-sm text-gray-500 mt-2">
-            Exclusive leads · Instant delivery · Cancel anytime
+          <p className="text-sm text-gray-500 mt-4">
+            Exclusive leads · Instant delivery · Full control
           </p>
         </div>
       </section>
@@ -321,42 +316,41 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Pricing */}
+      {/* Why Join */}
       <section className="py-20">
         <div className="container mx-auto px-4">
           <h2 className="text-4xl font-bold text-center text-gray-900 mb-12">
-            Simple Pricing That Makes Sense
+            Why Top Contractors Choose GarageLeadly
           </h2>
 
           <div className="max-w-lg mx-auto bg-gradient-to-br from-blue-600 to-green-600 rounded-2xl shadow-2xl p-8 text-white">
             <div className="text-center mb-8">
-              <div className="text-sm font-semibold mb-2 text-blue-100">MEMBERSHIP FEE</div>
-              <div className="text-6xl font-bold mb-2">$1,200</div>
-              <div className="text-xl">per year</div>
-              <div className="text-sm text-blue-100 mt-2">Access to the platform + your exclusive territory</div>
-            </div>
-
-            <div className="border-t border-white/30 pt-8 mb-8">
-              <div className="text-center mb-4">
-                <div className="text-2xl font-bold mb-1">$40-50 Per Lead</div>
-                <div className="text-blue-100">Only charged when you get a lead · Set your own daily budget</div>
-              </div>
+              <div className="text-3xl font-bold mb-4">Join Houston's Elite Garage Door Network</div>
+              <div className="text-blue-100">We're building a network of the best operators in the market</div>
             </div>
 
             <div className="mb-8">
-              <div className="text-xl font-bold mb-4">What You Pay:</div>
+              <div className="text-xl font-bold mb-4">What You Get:</div>
               <ul className="space-y-3">
                 <li className="flex items-start gap-3">
                   <span className="text-green-400 text-xl">✓</span>
-                  <span>$1,200 Annual Membership (one-time)</span>
+                  <span>100% Exclusive leads - no sharing, ever</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-green-400 text-xl">✓</span>
-                  <span>Daily market rate per lead (no minimums)</span>
+                  <span>Territory protection in your county</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-green-400 text-xl">✓</span>
-                  <span>No contracts, pause anytime</span>
+                  <span>Professional dashboard + full CRM</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-green-400 text-xl">✓</span>
+                  <span>Instant SMS delivery to your phone</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-green-400 text-xl">✓</span>
+                  <span>Complete control - pause anytime</span>
                 </li>
               </ul>
             </div>
@@ -390,7 +384,7 @@ export default function LandingPage() {
             Book Your Call
           </Link>
           <p className="text-gray-400 mt-6 text-sm">
-            $1,200/year + $40-50 per lead · Territory protection · Cancel anytime
+            Exclusive leads · Territory protection · Full control
           </p>
         </div>
       </section>

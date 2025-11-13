@@ -42,13 +42,13 @@ export default function SignupPage() {
 
         if (error) {
           console.error('Error saving signup:', error);
-          alert('There was an error. Please try again.');
+          alert('Error: ' + (error.message || error.details || 'Please try again'));
           setSubmitting(false);
           return;
         }
       } catch (err) {
         console.error('Error:', err);
-        alert('There was an error. Please try again.');
+        alert('Error: ' + (err.message || 'Please try again'));
         setSubmitting(false);
         return;
       }
