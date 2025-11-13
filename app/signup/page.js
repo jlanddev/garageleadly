@@ -16,6 +16,7 @@ export default function SignupPage() {
     phone: '',
     county: '',
     currentLeads: '',
+    smsConsent: false,
   });
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
@@ -41,6 +42,7 @@ export default function SignupPage() {
             phone: formData.phone,
             county: formData.county,
             current_leads: formData.currentLeads,
+            sms_consent: formData.smsConsent,
             status: 'new',
           }]);
 
@@ -190,10 +192,26 @@ export default function SignupPage() {
                 />
               </div>
 
+              <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="smsConsent"
+                    required
+                    checked={formData.smsConsent}
+                    onChange={(e) => setFormData({ ...formData, smsConsent: e.target.checked })}
+                    className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 mt-0.5 flex-shrink-0"
+                  />
+                  <span className="text-sm text-gray-700">
+                    I consent to receive text messages (SMS) with lead notifications at the phone number provided. Message frequency varies. Message and data rates may apply. Reply STOP to opt out.
+                  </span>
+                </label>
+              </div>
+
               <button
                 type="button"
                 onClick={handleNext}
-                disabled={!formData.companyName || !formData.contactName || !formData.phone || !formData.email}
+                disabled={!formData.companyName || !formData.contactName || !formData.phone || !formData.email || !formData.smsConsent}
                 className="w-full bg-blue-600 text-white py-4 rounded-lg font-bold text-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Continue →
