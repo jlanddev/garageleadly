@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { auth, getMockLeads } from '@/lib/auth';
+import { auth, getLeads } from '@/lib/auth';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -11,13 +11,20 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
-    const currentUser = auth.getCurrentUser();
-    if (!currentUser) {
-      router.push('/login');
-      return;
-    }
-    setUser(currentUser);
-    setLeads(getMockLeads(currentUser.id));
+    const fetchData = async () => {
+      const currentUser = auth.getCurrentUser();
+      if (!currentUser) {
+        router.push('/login');
+        return;
+      }
+      setUser(currentUser);
+
+      // Fetch real leads from database
+      const userLeads = await getLeads(currentUser.id);
+      setLeads(userLeads || []);
+    };
+
+    fetchData();
   }, []);
 
   const handleLogout = () => {
