@@ -4,6 +4,8 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
+// Contractor signup form
+
 export default function SignupPage() {
   const [formData, setFormData] = useState({
     companyName: '',
