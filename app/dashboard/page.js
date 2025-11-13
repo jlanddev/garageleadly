@@ -11,20 +11,20 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
-    const fetchData = async () => {
-      const currentUser = auth.getCurrentUser();
-      if (!currentUser) {
-        router.push('/login');
-        return;
-      }
-      setUser(currentUser);
+    const currentUser = auth.getCurrentUser();
+    if (!currentUser) {
+      router.push('/login');
+      return;
+    }
+    setUser(currentUser);
 
-      // Fetch real leads from database
+    // Fetch real leads from database
+    const fetchLeads = async () => {
       const userLeads = await getLeads(currentUser.id);
       setLeads(userLeads || []);
     };
 
-    fetchData();
+    fetchLeads();
   }, []);
 
   const handleLogout = () => {
