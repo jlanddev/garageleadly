@@ -12,12 +12,12 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
-    const result = auth.login(email, password);
+    const result = await auth.login(email, password);
 
     if (result.success) {
       router.push('/dashboard');

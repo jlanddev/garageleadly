@@ -1,140 +1,179 @@
--- GarageLeadly Supabase Database Schema
--- Run this in your Supabase SQL Editor to create all tables
+-- GarageLeadly Database Schema
 
--- Members table (contractor accounts)
-CREATE TABLE members (
-  id UUID PRIMARY KEY REFERENCES auth.users(id),
-  company_name TEXT NOT NULL,
+-- Enable UUID extension
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- Contractors table (user profiles)
+CREATE TABLE contractors (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   email TEXT UNIQUE NOT NULL,
   phone TEXT NOT NULL,
-  stripe_customer_id TEXT,
-  status TEXT NOT NULL DEFAULT 'pending', -- 'pending', 'active', 'paused', 'cancelled'
-  membership_fee INTEGER NOT NULL DEFAULT 50000, -- in cents ($500)
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  name TEXT NOT NULL,
+  company_name TEXT,
+  
+  -- Territory configuration (county-based)
+  counties TEXT[] NOT NULL, -- Array of counties they serve (must have at least 1)
+  
+  -- Lead preferences
+  daily_lead_cap INTEGER DEFAULT 5,
+  job_types TEXT[] DEFAULT ARRAY['residential', 'commercial'], -- ['residential', 'commercial'] or subset
+  status TEXT DEFAULT 'active' CHECK (status IN ('active', 'paused', 'suspended')),
+  
+  -- Billing
+  membership_tier TEXT DEFAULT 'basic' CHECK (membership_tier IN ('basic', 'pro', 'enterprise')),
+  price_per_lead DECIMAL(10,2) DEFAULT 25.00,
+  
+  -- Metadata
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Territories table (county assignments and budgets)
-CREATE TABLE territories (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  member_id UUID NOT NULL REFERENCES members(id) ON DELETE CASCADE,
-  county TEXT NOT NULL,
-  daily_budget INTEGER NOT NULL DEFAULT 20000, -- in cents ($200)
-  spent_today INTEGER NOT NULL DEFAULT 0, -- in cents
-  last_lead_timestamp TIMESTAMP WITH TIME ZONE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  UNIQUE(member_id) -- one territory per member for now
-);
-
--- Leads table (actual lead data)
+-- Leads table (consumer submissions from texasgaragefix.com)
 CREATE TABLE leads (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  
+  -- Consumer information
   name TEXT NOT NULL,
   phone TEXT NOT NULL,
-  email TEXT,
-  address TEXT,
-  zip TEXT,
-  county TEXT NOT NULL,
-  issue_description TEXT,
-  delivered_to_member_id UUID REFERENCES members(id),
-  price_charged INTEGER NOT NULL, -- in cents
+  email TEXT NOT NULL,
+  address TEXT NOT NULL,
+  city TEXT NOT NULL,
+  county TEXT NOT NULL, -- County for routing
+  zip TEXT NOT NULL,
+  issue TEXT NOT NULL,
+  job_type TEXT NOT NULL CHECK (job_type IN ('residential', 'commercial')),
+  
+  -- Lead routing
+  contractor_id UUID REFERENCES contractors(id),
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'assigned', 'contacted', 'converted', 'lost')),
+  
+  -- Timestamps
+  submitted_at TIMESTAMPTZ DEFAULT NOW(),
+  assigned_at TIMESTAMPTZ,
+  contacted_at TIMESTAMPTZ,
+  converted_at TIMESTAMPTZ,
+  
+  -- Quality scoring (future enhancement)
+  quality_score INTEGER CHECK (quality_score >= 0 AND quality_score <= 100)
+);
+
+-- Campaigns table (contractor lead preferences)
+CREATE TABLE campaigns (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  contractor_id UUID REFERENCES contractors(id) NOT NULL,
+  
+  -- Campaign settings
+  name TEXT NOT NULL,
+  daily_cap INTEGER DEFAULT 5,
+  status TEXT DEFAULT 'active' CHECK (status IN ('active', 'paused', 'completed')),
+  
+  -- Lead filters
+  service_types TEXT[], -- ['repair', 'installation', 'emergency']
+  job_types TEXT[], -- ['residential', 'commercial']
+  min_job_value DECIMAL(10,2),
+  
+  -- Budget & spending
+  budget DECIMAL(10,2),
+  spent DECIMAL(10,2) DEFAULT 0.00,
+  
+  -- Metadata
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Transactions table (billing records)
+CREATE TABLE transactions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  contractor_id UUID REFERENCES contractors(id) NOT NULL,
+  lead_id UUID REFERENCES leads(id),
+  
+  -- Transaction details
+  type TEXT NOT NULL CHECK (type IN ('lead_charge', 'membership_fee', 'refund', 'credit')),
+  amount DECIMAL(10,2) NOT NULL,
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'completed', 'failed', 'refunded')),
+  
+  -- Payment method
+  payment_method TEXT, -- 'stripe', 'card', etc.
   stripe_charge_id TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  delivered_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  
+  -- Metadata
+  description TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Lead outcomes table (CRM tracking)
-CREATE TABLE lead_outcomes (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  lead_id UUID NOT NULL REFERENCES leads(id) ON DELETE CASCADE,
-  member_id UUID NOT NULL REFERENCES members(id) ON DELETE CASCADE,
-  status TEXT NOT NULL DEFAULT 'new', -- 'new', 'called', 'scheduled', 'completed', 'lost'
-  job_value INTEGER, -- in cents (only for completed jobs)
-  notes TEXT,
-  called_at TIMESTAMP WITH TIME ZONE,
-  scheduled_at TIMESTAMP WITH TIME ZONE,
-  completed_at TIMESTAMP WITH TIME ZONE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  UNIQUE(lead_id) -- one outcome per lead
+-- Daily lead count tracking (for cap enforcement)
+CREATE TABLE daily_lead_counts (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  contractor_id UUID REFERENCES contractors(id) NOT NULL,
+  date DATE DEFAULT CURRENT_DATE,
+  lead_count INTEGER DEFAULT 0,
+  
+  UNIQUE(contractor_id, date)
 );
 
--- Daily pricing table (track market rates)
-CREATE TABLE daily_pricing (
-  date DATE PRIMARY KEY DEFAULT CURRENT_DATE,
-  price_per_lead INTEGER NOT NULL, -- in cents
-  cost_per_lead INTEGER NOT NULL, -- in cents (Google Ads cost)
-  margin_percent DECIMAL(5,2),
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- Indexes for performance
-CREATE INDEX idx_territories_county ON territories(county);
+-- Create indexes for better query performance
+CREATE INDEX idx_contractors_status ON contractors(status);
+CREATE INDEX idx_contractors_counties ON contractors USING GIN(counties);
+CREATE INDEX idx_contractors_job_types ON contractors USING GIN(job_types);
+CREATE INDEX idx_leads_status ON leads(status);
 CREATE INDEX idx_leads_county ON leads(county);
-CREATE INDEX idx_leads_member ON leads(delivered_to_member_id);
-CREATE INDEX idx_leads_created ON leads(created_at DESC);
-CREATE INDEX idx_lead_outcomes_member ON lead_outcomes(member_id);
-CREATE INDEX idx_lead_outcomes_status ON lead_outcomes(status);
+CREATE INDEX idx_leads_job_type ON leads(job_type);
+CREATE INDEX idx_leads_contractor ON leads(contractor_id);
+CREATE INDEX idx_leads_submitted ON leads(submitted_at);
+CREATE INDEX idx_campaigns_contractor ON campaigns(contractor_id);
+CREATE INDEX idx_campaigns_status ON campaigns(status);
+CREATE INDEX idx_transactions_contractor ON transactions(contractor_id);
+CREATE INDEX idx_transactions_lead ON transactions(lead_id);
+CREATE INDEX idx_daily_counts_contractor_date ON daily_lead_counts(contractor_id, date);
+
+-- Create updated_at trigger function
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- Add triggers for updated_at
+CREATE TRIGGER update_contractors_updated_at BEFORE UPDATE ON contractors
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_campaigns_updated_at BEFORE UPDATE ON campaigns
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Row Level Security (RLS) Policies
-
--- Members: Users can only see their own data
-ALTER TABLE members ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Users can view their own member data"
-  ON members FOR SELECT
-  USING (auth.uid() = id);
-
-CREATE POLICY "Users can update their own member data"
-  ON members FOR UPDATE
-  USING (auth.uid() = id);
-
--- Territories: Users can only see/update their own territories
-ALTER TABLE territories ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Users can view their own territories"
-  ON territories FOR SELECT
-  USING (auth.uid() = member_id);
-
-CREATE POLICY "Users can update their own territories"
-  ON territories FOR UPDATE
-  USING (auth.uid() = member_id);
-
--- Leads: Users can only see leads delivered to them
+ALTER TABLE contractors ENABLE ROW LEVEL SECURITY;
 ALTER TABLE leads ENABLE ROW LEVEL SECURITY;
+ALTER TABLE campaigns ENABLE ROW LEVEL SECURITY;
+ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE daily_lead_counts ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can view their own leads"
-  ON leads FOR SELECT
-  USING (auth.uid() = delivered_to_member_id);
+-- Contractors can only see their own data
+CREATE POLICY "Contractors can view own profile" ON contractors
+    FOR SELECT USING (auth.uid() = id);
 
--- Lead outcomes: Users can only see/manage their own lead outcomes
-ALTER TABLE lead_outcomes ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Contractors can update own profile" ON contractors
+    FOR UPDATE USING (auth.uid() = id);
 
-CREATE POLICY "Users can view their own lead outcomes"
-  ON lead_outcomes FOR SELECT
-  USING (auth.uid() = member_id);
+-- Contractors can only see their assigned leads
+CREATE POLICY "Contractors can view assigned leads" ON leads
+    FOR SELECT USING (contractor_id = auth.uid());
 
-CREATE POLICY "Users can insert their own lead outcomes"
-  ON lead_outcomes FOR INSERT
-  WITH CHECK (auth.uid() = member_id);
+-- Contractors can only see their own campaigns
+CREATE POLICY "Contractors can view own campaigns" ON campaigns
+    FOR SELECT USING (contractor_id = auth.uid());
 
-CREATE POLICY "Users can update their own lead outcomes"
-  ON lead_outcomes FOR UPDATE
-  USING (auth.uid() = member_id);
+CREATE POLICY "Contractors can create own campaigns" ON campaigns
+    FOR INSERT WITH CHECK (contractor_id = auth.uid());
 
--- Daily pricing: Public read access
-ALTER TABLE daily_pricing ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Contractors can update own campaigns" ON campaigns
+    FOR UPDATE USING (contractor_id = auth.uid());
 
-CREATE POLICY "Anyone can view daily pricing"
-  ON daily_pricing FOR SELECT
-  TO authenticated
-  USING (true);
+-- Contractors can only see their own transactions
+CREATE POLICY "Contractors can view own transactions" ON transactions
+    FOR SELECT USING (contractor_id = auth.uid());
 
--- Insert initial pricing
-INSERT INTO daily_pricing (date, price_per_lead, cost_per_lead, margin_percent)
-VALUES (CURRENT_DATE, 4500, 3500, 28.57)
-ON CONFLICT (date) DO NOTHING;
-
--- Success message
-SELECT 'GarageLeadly database schema created successfully!' as message;
+-- Contractors can view their own daily counts
+CREATE POLICY "Contractors can view own daily counts" ON daily_lead_counts
+    FOR SELECT USING (contractor_id = auth.uid());
