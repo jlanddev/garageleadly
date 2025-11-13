@@ -48,9 +48,9 @@ export default function LandingPage() {
       {/* Header */}
       <header className="container mx-auto px-4 py-6">
         <div className="flex justify-between items-center">
-          <div className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
-            GarageLeadly
-          </div>
+          <Link href="/">
+            <img src="/logo.png" alt="GarageLeadly" className="h-12 md:h-16" />
+          </Link>
           <Link
             href="/login"
             className="text-blue-600 hover:text-blue-700 font-medium"

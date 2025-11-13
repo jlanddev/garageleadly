@@ -33,8 +33,8 @@ export default function LoginPage() {
       <div className="max-w-md w-full">
         {/* Logo */}
         <div className="text-center mb-8">
-          <Link href="/" className="text-3xl font-bold text-blue-600">
-            GarageLeadly
+          <Link href="/" className="inline-block">
+            <img src="/logo.png" alt="GarageLeadly" className="h-16 mx-auto" />
           </Link>
           <p className="text-gray-600 mt-2">Member Login</p>
         </div>

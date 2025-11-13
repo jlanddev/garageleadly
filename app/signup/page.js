@@ -72,8 +72,8 @@ export default function SignupPage() {
       <div className="max-w-2xl mx-auto">
         {/* Logo */}
         <div className="text-center mb-8">
-          <Link href="/" className="text-3xl font-bold text-blue-600">
-            GarageLeadly
+          <Link href="/" className="inline-block">
+            <img src="/logo.png" alt="GarageLeadly" className="h-16 mx-auto" />
           </Link>
           <p className="text-gray-600 mt-2 text-lg">Get Exclusive Garage Door Leads in Your Territory</p>
         </div>
