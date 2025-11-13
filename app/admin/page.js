@@ -5,220 +5,325 @@ import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 
 export default function AdminPage() {
+  const [leads, setLeads] = useState([]);
+  const [contractors, setContractors] = useState([]);
   const [signups, setSignups] = useState([]);
+  const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all');
+  const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
-    fetchSignups();
-  }, [filter]);
+    fetchAllData();
 
-  const fetchSignups = async () => {
+    // Auto-refresh every 10 seconds for live feed
+    const interval = setInterval(fetchAllData, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const fetchAllData = async () => {
     setLoading(true);
-    let query = supabase
-      .from('contractor_signups')
-      .select('*')
-      .order('submitted_at', { ascending: false });
 
-    if (filter !== 'all') {
-      query = query.eq('status', filter);
-    }
+    // Fetch leads from today
+    const today = new Date().toISOString().split('T')[0];
 
-    const { data, error } = await query;
+    const [leadsRes, contractorsRes, signupsRes, transactionsRes] = await Promise.all([
+      supabase.from('leads').select('*').gte('submitted_at', today + 'T00:00:00').order('submitted_at', { ascending: false }),
+      supabase.from('contractors').select('*').eq('status', 'active'),
+      supabase.from('contractor_signups').select('*').order('submitted_at', { ascending: false }).limit(20),
+      supabase.from('transactions').select('*').gte('created_at', today + 'T00:00:00').eq('type', 'lead_charge'),
+    ]);
 
-    if (error) {
-      console.error('Error fetching signups:', error);
-    } else {
-      setSignups(data || []);
-    }
+    setLeads(leadsRes.data || []);
+    setContractors(contractorsRes.data || []);
+    setSignups(signupsRes.data || []);
+    setTransactions(transactionsRes.data || []);
     setLoading(false);
   };
 
-  const updateStatus = async (id, newStatus) => {
-    const { error } = await supabase
-      .from('contractor_signups')
-      .update({ status: newStatus })
-      .eq('id', id);
+  // Calculate metrics
+  const todayLeads = leads.length;
+  const assignedLeads = leads.filter(l => l.status === 'assigned').length;
+  const todayRevenue = transactions.reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
 
-    if (error) {
-      console.error('Error updating status:', error);
-      alert('Error updating status');
-    } else {
-      fetchSignups();
-    }
-  };
+  // Mock Google Ads data (you'll integrate with Google Ads API later)
+  const googleAdsSpend = 450; // Daily spend
+  const googleClicks = 180;
+  const costPerClick = googleAdsSpend / googleClicks;
+  const costPerLead = todayLeads > 0 ? googleAdsSpend / todayLeads : 0;
+  const profit = todayRevenue - googleAdsSpend;
 
-  const addNote = async (id) => {
-    const note = prompt('Add a note:');
-    if (!note) return;
-
-    const { error } = await supabase
-      .from('contractor_signups')
-      .update({ notes: note })
-      .eq('id', id);
-
-    if (error) {
-      console.error('Error adding note:', error);
-      alert('Error adding note');
-    } else {
-      fetchSignups();
-    }
-  };
-
-  const getStatusColor = (status) => {
-    const colors = {
-      new: 'bg-blue-100 text-blue-800',
-      contacted: 'bg-yellow-100 text-yellow-800',
-      scheduled: 'bg-purple-100 text-purple-800',
-      qualified: 'bg-green-100 text-green-800',
-      closed: 'bg-green-600 text-white',
-      lost: 'bg-gray-100 text-gray-800',
-    };
-    return colors[status] || 'bg-gray-100 text-gray-800';
-  };
-
-  const stats = {
-    total: signups.length,
-    new: signups.filter(s => s.status === 'new').length,
-    scheduled: signups.filter(s => s.status === 'scheduled').length,
-    closed: signups.filter(s => s.status === 'closed').length,
-  };
+  // Calculate demand
+  const totalDailyCap = contractors.reduce((sum, c) => sum + (c.daily_lead_cap || 0), 0);
+  const demandFulfillment = totalDailyCap > 0 ? (todayLeads / totalDailyCap * 100) : 0;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">GarageLeadly Admin</h1>
-              <p className="text-gray-600">Manage contractor signups and sales pipeline</p>
+    <div className="min-h-screen bg-gray-900 text-white">
+      {/* Header */}
+      <div className="bg-gray-800 border-b border-gray-700 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">GarageLeadly Operations</h1>
+            <p className="text-gray-400 text-sm">Live Business Dashboard</p>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="text-right">
+              <div className="text-sm text-gray-400">Last Updated</div>
+              <div className="text-sm font-mono">{new Date().toLocaleTimeString()}</div>
             </div>
-            <Link
-              href="/"
-              className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
-            >
-              ← Back to Site
+            <Link href="/" className="bg-gray-700 px-4 py-2 rounded hover:bg-gray-600">
+              Exit Admin
             </Link>
           </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-4 gap-4 mb-6">
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
-              <div className="text-sm text-gray-600">Total Signups</div>
-            </div>
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="text-2xl font-bold text-blue-600">{stats.new}</div>
-              <div className="text-sm text-gray-600">New Leads</div>
-            </div>
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="text-2xl font-bold text-purple-600">{stats.scheduled}</div>
-              <div className="text-sm text-gray-600">Calls Scheduled</div>
-            </div>
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="text-2xl font-bold text-green-600">{stats.closed}</div>
-              <div className="text-sm text-gray-600">Closed Deals</div>
-            </div>
-          </div>
-
-          {/* Filters */}
-          <div className="flex gap-2">
-            {['all', 'new', 'contacted', 'scheduled', 'qualified', 'closed', 'lost'].map((status) => (
-              <button
-                key={status}
-                onClick={() => setFilter(status)}
-                className={`px-4 py-2 rounded-lg font-medium capitalize transition ${
-                  filter === status
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                {status}
-              </button>
-            ))}
-          </div>
         </div>
+      </div>
 
-        {/* Signups Table */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          {loading ? (
-            <div className="p-8 text-center text-gray-500">Loading...</div>
-          ) : signups.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">No signups yet</div>
-          ) : (
+      {/* Tabs */}
+      <div className="bg-gray-800 border-b border-gray-700 px-6">
+        <div className="flex gap-4">
+          {['overview', 'live-feed', 'signups', 'calendar'].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-3 font-medium capitalize border-b-2 transition ${
+                activeTab === tab
+                  ? 'border-blue-500 text-blue-400'
+                  : 'border-transparent text-gray-400 hover:text-white'
+              }`}
+            >
+              {tab.replace('-', ' ')}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="p-6">
+        {/* OVERVIEW TAB */}
+        {activeTab === 'overview' && (
+          <div className="space-y-6">
+            {/* Top Metrics */}
+            <div className="grid grid-cols-5 gap-4">
+              <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg p-6">
+                <div className="text-3xl font-bold">{todayLeads}</div>
+                <div className="text-blue-200 text-sm">Leads Today</div>
+                <div className="text-xs text-blue-300 mt-2">{assignedLeads} assigned</div>
+              </div>
+
+              <div className="bg-gradient-to-br from-green-600 to-green-700 rounded-lg p-6">
+                <div className="text-3xl font-bold">${todayRevenue.toFixed(2)}</div>
+                <div className="text-green-200 text-sm">Revenue Today</div>
+                <div className="text-xs text-green-300 mt-2">${(todayRevenue / (todayLeads || 1)).toFixed(2)} per lead</div>
+              </div>
+
+              <div className="bg-gradient-to-br from-red-600 to-red-700 rounded-lg p-6">
+                <div className="text-3xl font-bold">${googleAdsSpend.toFixed(2)}</div>
+                <div className="text-red-200 text-sm">Google Ads Spend</div>
+                <div className="text-xs text-red-300 mt-2">${costPerClick.toFixed(2)} per click</div>
+              </div>
+
+              <div className="bg-gradient-to-br from-purple-600 to-purple-700 rounded-lg p-6">
+                <div className="text-3xl font-bold">${costPerLead.toFixed(2)}</div>
+                <div className="text-purple-200 text-sm">Cost Per Lead</div>
+                <div className="text-xs text-purple-300 mt-2">{googleClicks} clicks</div>
+              </div>
+
+              <div className={`bg-gradient-to-br rounded-lg p-6 ${profit >= 0 ? 'from-emerald-600 to-emerald-700' : 'from-orange-600 to-orange-700'}`}>
+                <div className="text-3xl font-bold">${profit.toFixed(2)}</div>
+                <div className={`text-sm ${profit >= 0 ? 'text-emerald-200' : 'text-orange-200'}`}>
+                  {profit >= 0 ? 'Profit' : 'Loss'} Today
+                </div>
+                <div className={`text-xs mt-2 ${profit >= 0 ? 'text-emerald-300' : 'text-orange-300'}`}>
+                  {((profit / todayRevenue) * 100 || 0).toFixed(1)}% margin
+                </div>
+              </div>
+            </div>
+
+            {/* Lead Demand */}
+            <div className="bg-gray-800 rounded-lg p-6">
+              <h3 className="text-xl font-bold mb-4">Lead Production Status</h3>
+              <div className="grid grid-cols-3 gap-6">
+                <div>
+                  <div className="text-sm text-gray-400 mb-2">Contractor Demand (Daily Caps)</div>
+                  <div className="text-3xl font-bold text-blue-400">{totalDailyCap}</div>
+                  <div className="text-xs text-gray-500">{contractors.length} active contractors</div>
+                </div>
+                <div>
+                  <div className="text-sm text-gray-400 mb-2">Leads Delivered Today</div>
+                  <div className="text-3xl font-bold text-green-400">{todayLeads}</div>
+                  <div className="text-xs text-gray-500">{assignedLeads} assigned, {todayLeads - assignedLeads} pending</div>
+                </div>
+                <div>
+                  <div className="text-sm text-gray-400 mb-2">Demand Fulfillment</div>
+                  <div className="text-3xl font-bold text-purple-400">{demandFulfillment.toFixed(1)}%</div>
+                  <div className="w-full bg-gray-700 rounded-full h-2 mt-2">
+                    <div
+                      className="bg-purple-500 h-2 rounded-full transition-all"
+                      style={{ width: `${Math.min(demandFulfillment, 100)}%` }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Contractor Queue */}
+            <div className="bg-gray-800 rounded-lg p-6">
+              <h3 className="text-xl font-bold mb-4">Lead Rotation Queue (Active Contractors)</h3>
+              <div className="space-y-2">
+                {contractors.length === 0 ? (
+                  <div className="text-gray-400 text-center py-4">No active contractors</div>
+                ) : (
+                  contractors.map((contractor, index) => {
+                    const todayLeadsCount = leads.filter(l => l.contractor_id === contractor.id).length;
+                    const remaining = contractor.daily_lead_cap - todayLeadsCount;
+
+                    return (
+                      <div key={contractor.id} className="bg-gray-700 rounded p-4 flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="bg-blue-600 rounded-full w-10 h-10 flex items-center justify-center font-bold">
+                            {index + 1}
+                          </div>
+                          <div>
+                            <div className="font-semibold">{contractor.company_name || contractor.name}</div>
+                            <div className="text-sm text-gray-400">{contractor.counties?.join(', ')}</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-6">
+                          <div className="text-right">
+                            <div className="text-sm text-gray-400">Today</div>
+                            <div className="font-bold">{todayLeadsCount} / {contractor.daily_lead_cap}</div>
+                          </div>
+                          <div className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                            remaining > 0 ? 'bg-green-600' : 'bg-red-600'
+                          }`}>
+                            {remaining > 0 ? `${remaining} slots open` : 'Cap reached'}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* LIVE FEED TAB */}
+        {activeTab === 'live-feed' && (
+          <div className="space-y-4">
+            <div className="bg-gray-800 rounded-lg p-4 flex items-center justify-between">
+              <h3 className="text-xl font-bold">Live Lead Feed</h3>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-sm text-gray-400">Auto-refreshing every 10s</span>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              {leads.length === 0 ? (
+                <div className="bg-gray-800 rounded-lg p-8 text-center text-gray-400">
+                  No leads today yet. Waiting for first lead...
+                </div>
+              ) : (
+                leads.map((lead) => {
+                  const contractor = contractors.find(c => c.id === lead.contractor_id);
+                  const transaction = transactions.find(t => t.lead_id === lead.id);
+
+                  return (
+                    <div key={lead.id} className="bg-gray-800 rounded-lg p-6 border-l-4 border-blue-500">
+                      <div className="grid grid-cols-4 gap-6">
+                        <div>
+                          <div className="text-xs text-gray-400 mb-1">TIME</div>
+                          <div className="font-mono text-sm">
+                            {new Date(lead.submitted_at).toLocaleTimeString()}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-gray-400 mb-1">CUSTOMER</div>
+                          <div className="font-semibold">{lead.name}</div>
+                          <div className="text-xs text-gray-400">{lead.county} • {lead.job_type}</div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-gray-400 mb-1">ASSIGNED TO</div>
+                          {contractor ? (
+                            <>
+                              <div className="font-semibold">{contractor.company_name || contractor.name}</div>
+                              <div className="text-xs text-gray-400">{contractor.phone}</div>
+                            </>
+                          ) : (
+                            <div className="text-yellow-400">Pending assignment</div>
+                          )}
+                        </div>
+                        <div>
+                          <div className="text-xs text-gray-400 mb-1">CHARGE</div>
+                          {transaction ? (
+                            <>
+                              <div className="font-semibold text-green-400">${transaction.amount}</div>
+                              <div className="text-xs text-gray-400 capitalize">{transaction.status}</div>
+                            </>
+                          ) : (
+                            <div className="text-xs text-gray-400">Processing...</div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* SIGNUPS TAB */}
+        {activeTab === 'signups' && (
+          <div className="bg-gray-800 rounded-lg overflow-hidden">
+            <div className="p-4 border-b border-gray-700">
+              <h3 className="text-xl font-bold">Contractor Signups (Sales Pipeline)</h3>
+            </div>
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50 border-b">
+                <thead className="bg-gray-700">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Company</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contact</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">County</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Current Leads</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Date</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Company</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Contact</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">County</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-gray-700">
                   {signups.map((signup) => (
-                    <tr key={signup.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(signup.submitted_at).toLocaleDateString()}
+                    <tr key={signup.id} className="hover:bg-gray-700">
+                      <td className="px-6 py-4 text-sm">{new Date(signup.submitted_at).toLocaleDateString()}</td>
+                      <td className="px-6 py-4">
+                        <div className="font-medium">{signup.company_name}</div>
+                        <div className="text-sm text-gray-400">{signup.email}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="font-medium text-gray-900">{signup.company_name}</div>
-                        <div className="text-sm text-gray-500">{signup.email}</div>
+                      <td className="px-6 py-4">
+                        <div>{signup.contact_name}</div>
+                        <div className="text-sm text-blue-400">{signup.phone}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {signup.contact_name}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <a href={`tel:${signup.phone}`} className="text-blue-600 hover:text-blue-800">
-                          {signup.phone}
-                        </a>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {signup.county}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {signup.current_leads}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <select
-                          value={signup.status}
-                          onChange={(e) => updateStatus(signup.id, e.target.value)}
-                          className={`px-2 py-1 rounded-full text-xs font-semibold capitalize ${getStatusColor(signup.status)}`}
-                        >
-                          <option value="new">New</option>
-                          <option value="contacted">Contacted</option>
-                          <option value="scheduled">Scheduled</option>
-                          <option value="qualified">Qualified</option>
-                          <option value="closed">Closed</option>
-                          <option value="lost">Lost</option>
-                        </select>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <button
-                          onClick={() => addNote(signup.id)}
-                          className="text-blue-600 hover:text-blue-800 mr-3"
-                        >
-                          {signup.notes ? '📝 Edit Note' : '+ Add Note'}
-                        </button>
-                        {signup.notes && (
-                          <div className="text-xs text-gray-500 mt-1 max-w-xs truncate" title={signup.notes}>
-                            {signup.notes}
-                          </div>
-                        )}
+                      <td className="px-6 py-4 text-sm">{signup.county}</td>
+                      <td className="px-6 py-4">
+                        <span className="px-3 py-1 rounded-full text-xs font-semibold capitalize bg-blue-600">
+                          {signup.status}
+                        </span>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-          )}
-        </div>
+          </div>
+        )}
+
+        {/* CALENDAR TAB */}
+        {activeTab === 'calendar' && (
+          <div className="bg-gray-800 rounded-lg p-6">
+            <h3 className="text-xl font-bold mb-4">Scheduled Sales Calls</h3>
+            <div className="text-gray-400 text-center py-12">
+              Calendar booking system coming next...
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
