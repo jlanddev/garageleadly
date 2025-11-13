@@ -398,52 +398,22 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-800 text-gray-400 py-12">
-        <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto">
-            <div className="grid md:grid-cols-3 gap-8 mb-8">
-              {/* Company Info */}
-              <div>
-                <div className="text-xl font-bold text-white mb-4">GarageLeadly</div>
-                <p className="mb-4 text-sm">Exclusive garage door leads for professional contractors</p>
-                <p className="text-sm">
-                  <strong className="text-white">LR Acquisitions LLC</strong><br />
-                  32 North Gould Street<br />
-                  Sheridan, WY 82801
-                </p>
-              </div>
-
-              {/* Quick Links */}
-              <div>
-                <h3 className="text-white font-bold mb-4">Quick Links</h3>
-                <div className="space-y-2 text-sm">
-                  <div><Link href="/login" className="hover:text-white">Login</Link></div>
-                  <div><Link href="/signup" className="hover:text-white">Sign Up</Link></div>
-                  <div><Link href="/privacy-policy" className="hover:text-white">Privacy Policy</Link></div>
-                  <div><Link href="/terms-of-use" className="hover:text-white">Terms of Use</Link></div>
-                  <div><Link href="/refund-policy" className="hover:text-white">Refund Policy</Link></div>
-                </div>
-              </div>
-
-              {/* Contact */}
-              <div>
-                <h3 className="text-white font-bold mb-4">Contact Us</h3>
-                <div className="space-y-2 text-sm">
-                  <p>
-                    <strong className="text-white">Email:</strong><br />
-                    <a href="mailto:support@garageleadly.com" className="hover:text-white">support@garageleadly.com</a>
-                  </p>
-                  <p className="text-xs pt-4">
-                    Questions? Need help?<br />
-                    We're here to assist you.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-8 border-t border-gray-700 text-center text-sm">
-              © 2024 LR Acquisitions LLC d/b/a GarageLeadly. All rights reserved.
-            </div>
+      <footer className="bg-gray-800 text-gray-400 py-8">
+        <div className="container mx-auto px-4 text-center">
+          <div className="text-xl font-bold text-white mb-4">GarageLeadly</div>
+          <p className="mb-4 text-sm">Exclusive garage door leads for professional contractors</p>
+          <div className="flex justify-center gap-6 mb-4 flex-wrap">
+            <Link href="/login" className="hover:text-white text-sm">Login</Link>
+            <Link href="/signup" className="hover:text-white text-sm">Sign Up</Link>
+            <Link href="/privacy-policy" className="hover:text-white text-sm">Privacy Policy</Link>
+            <Link href="/terms-of-use" className="hover:text-white text-sm">Terms of Use</Link>
+            <Link href="/refund-policy" className="hover:text-white text-sm">Refund Policy</Link>
+          </div>
+          <p className="text-sm mb-2">
+            <a href="mailto:support@garageleadly.com" className="hover:text-white">support@garageleadly.com</a>
+          </p>
+          <div className="text-xs">
+            © 2024 GarageLeadly. All rights reserved.
           </div>
         </div>
       </footer>
