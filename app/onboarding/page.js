@@ -91,42 +91,46 @@ function OnboardingContent() {
         {/* Payment Step */}
         {step === 'payment' && (
           <div>
-            <h1 className="text-2xl font-bold mb-2">Welcome to GarageLeadly</h1>
-            <p className="text-gray-600 mb-6">Start receiving qualified garage door leads today</p>
+            <h1 className="text-2xl font-bold mb-2 text-gray-900">GarageLeadly</h1>
+            <p className="text-gray-500 mb-8">Exclusive territory membership</p>
 
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-lg font-semibold">Annual Membership</span>
-                <span className="text-2xl font-bold text-blue-600">$1,200</span>
+            <div className="border border-gray-200 rounded-lg p-6 mb-8">
+              <div className="flex justify-between items-baseline mb-1">
+                <span className="text-sm font-medium text-gray-700">Annual Membership</span>
+                <div className="text-right">
+                  <span className="text-3xl font-bold text-gray-900">$1,200</span>
+                  <span className="text-gray-500 text-sm">/year</span>
+                </div>
               </div>
-              <p className="text-sm text-gray-600">Billed once per year</p>
             </div>
 
-            <ul className="space-y-3 mb-8">
-              <li className="flex items-start">
-                <span className="text-green-500 mr-2">✓</span>
-                <span>Unlimited qualified leads in your service area</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-green-500 mr-2">✓</span>
-                <span>Pay only for leads you receive</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-green-500 mr-2">✓</span>
-                <span>Set your own daily budget</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-green-500 mr-2">✓</span>
-                <span>Real-time SMS notifications</span>
-              </li>
-            </ul>
+            <div className="space-y-3 mb-8 text-sm text-gray-600">
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+                <span>Exclusive county territory</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+                <span>Pay per lead received</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+                <span>Set daily budget limits</span>
+              </div>
+            </div>
 
             <button
               onClick={handlePayment}
               disabled={loading}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-400"
+              className="w-full bg-gray-900 text-white py-3 rounded-lg font-medium hover:bg-gray-800 disabled:bg-gray-400 transition"
             >
-              {loading ? 'Processing...' : 'Pay $1,200 & Continue'}
+              {loading ? 'Processing...' : 'Continue to payment'}
             </button>
           </div>
         )}
@@ -134,8 +138,8 @@ function OnboardingContent() {
         {/* Profile Setup Step */}
         {step === 'profile' && (
           <div>
-            <h1 className="text-2xl font-bold mb-2">Create Your Profile</h1>
-            <p className="text-gray-600 mb-6">Tell us about your business</p>
+            <h1 className="text-2xl font-bold mb-2 text-gray-900">Business Profile</h1>
+            <p className="text-gray-500 mb-6">Set up your account</p>
 
             <form onSubmit={handleProfileSubmit} className="space-y-4">
               <div>
@@ -185,7 +189,7 @@ function OnboardingContent() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-400"
+                className="w-full bg-gray-900 text-white py-3 rounded-lg font-medium hover:bg-gray-800 disabled:bg-gray-400 transition"
               >
                 {loading ? 'Creating...' : 'Continue'}
               </button>
@@ -196,8 +200,8 @@ function OnboardingContent() {
         {/* Campaign Setup Step */}
         {step === 'campaign' && (
           <div>
-            <h1 className="text-2xl font-bold mb-2">Setup Your First Campaign</h1>
-            <p className="text-gray-600 mb-6">Choose your service area and budget</p>
+            <h1 className="text-2xl font-bold mb-2 text-gray-900">Campaign Setup</h1>
+            <p className="text-gray-500 mb-6">Configure your territory and budget</p>
 
             <form onSubmit={handleCampaignSubmit} className="space-y-4">
               <div>
@@ -235,18 +239,18 @@ function OnboardingContent() {
                 </p>
               </div>
 
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <p className="text-sm text-gray-700">
-                  Next: You'll add a payment method for per-lead charges
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <p className="text-sm text-gray-600">
+                  Next: Add payment method for lead charges
                 </p>
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-400"
+                className="w-full bg-gray-900 text-white py-3 rounded-lg font-medium hover:bg-gray-800 disabled:bg-gray-400 transition"
               >
-                {loading ? 'Setting up...' : 'Continue to Payment Setup'}
+                {loading ? 'Setting up...' : 'Continue'}
               </button>
             </form>
           </div>
