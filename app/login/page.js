@@ -118,16 +118,17 @@ export default function LoginPage() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-gray-800 text-gray-400 py-8">
+      <footer className="bg-gray-800 text-gray-400 py-4">
         <div className="container mx-auto px-4 text-center">
-          <div className="flex justify-center gap-6 mb-4 flex-wrap text-sm">
+          <div className="flex justify-center gap-4 mb-2 flex-wrap text-xs">
             <Link href="/privacy-policy" className="hover:text-white">Privacy Policy</Link>
+            <span>·</span>
             <Link href="/terms-of-use" className="hover:text-white">Terms of Use</Link>
+            <span>·</span>
             <Link href="/refund-policy" className="hover:text-white">Refund Policy</Link>
-          </div>
-          <p className="text-sm mb-2">
+            <span>·</span>
             <a href="mailto:support@garageleadly.com" className="hover:text-white">support@garageleadly.com</a>
-          </p>
+          </div>
           <div className="text-xs">
             © 2024 GarageLeadly. All rights reserved.
           </div>

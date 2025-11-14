@@ -398,20 +398,17 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-800 text-gray-400 py-8">
+      <footer className="bg-gray-800 text-gray-400 py-4">
         <div className="container mx-auto px-4 text-center">
-          <div className="text-xl font-bold text-white mb-4">GarageLeadly</div>
-          <p className="mb-4 text-sm">Exclusive garage door leads for professional contractors</p>
-          <div className="flex justify-center gap-6 mb-4 flex-wrap">
-            <Link href="/login" className="hover:text-white text-sm">Login</Link>
-            <Link href="/signup" className="hover:text-white text-sm">Sign Up</Link>
-            <Link href="/privacy-policy" className="hover:text-white text-sm">Privacy Policy</Link>
-            <Link href="/terms-of-use" className="hover:text-white text-sm">Terms of Use</Link>
-            <Link href="/refund-policy" className="hover:text-white text-sm">Refund Policy</Link>
-          </div>
-          <p className="text-sm mb-2">
+          <div className="flex justify-center gap-4 mb-2 flex-wrap text-xs">
+            <Link href="/privacy-policy" className="hover:text-white">Privacy Policy</Link>
+            <span>·</span>
+            <Link href="/terms-of-use" className="hover:text-white">Terms of Use</Link>
+            <span>·</span>
+            <Link href="/refund-policy" className="hover:text-white">Refund Policy</Link>
+            <span>·</span>
             <a href="mailto:support@garageleadly.com" className="hover:text-white">support@garageleadly.com</a>
-          </p>
+          </div>
           <div className="text-xs">
             © 2024 GarageLeadly. All rights reserved.
           </div>
