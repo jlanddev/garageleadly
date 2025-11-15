@@ -23,7 +23,7 @@ export default function SuccessPage() {
 
         {/* Header */}
         <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-          Welcome to GarageLeadly! 🎉
+          Welcome to GarageLeadly!
         </h1>
         <p className="text-xl text-gray-700 mb-8">
           Your payment was successful. You're now activated and ready to receive leads!
