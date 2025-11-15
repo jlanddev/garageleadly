@@ -116,60 +116,81 @@ export default function LeadsMap({ leads = [] }) {
     // Add fullscreen control
     map.current.addControl(new mapboxgl.FullscreenControl(), 'top-right');
 
-    // Smooth transitions and add parcel tile layer
+    // Smooth transitions and click-to-highlight parcel
     map.current.on('load', () => {
       map.current.resize();
 
-      // Add Regrid parcel boundaries tile layer
-      const token = process.env.NEXT_PUBLIC_REGRID_TOKEN;
-      if (token) {
-        console.log('Adding Regrid parcel tiles...');
+      // Add empty source for clicked parcel
+      map.current.addSource('clicked-parcel', {
+        type: 'geojson',
+        data: {
+          type: 'FeatureCollection',
+          features: []
+        }
+      });
 
-        // Add Regrid vector tile source - CORRECT endpoint
-        map.current.addSource('regrid-parcels', {
-          type: 'vector',
-          tiles: [`https://tiles.regrid.com/api/v1/parcels/{z}/{x}/{y}.mvt?token=${token}`],
-          minzoom: 10,
-          maxzoom: 21
-        });
+      // Add fill layer for clicked parcel
+      map.current.addLayer({
+        id: 'clicked-parcel-fill',
+        type: 'fill',
+        source: 'clicked-parcel',
+        paint: {
+          'fill-color': '#FF0000',
+          'fill-opacity': 0.3
+        }
+      });
 
-        // Debug: log source data
-        map.current.on('sourcedata', (e) => {
-          if (e.sourceId === 'regrid-parcels' && e.isSourceLoaded) {
-            console.log('Regrid source loaded:', e);
-            // Try to get layer names from the source
-            const source = map.current.getSource('regrid-parcels');
-            console.log('Source:', source);
+      // Add outline layer for clicked parcel
+      map.current.addLayer({
+        id: 'clicked-parcel-outline',
+        type: 'line',
+        source: 'clicked-parcel',
+        paint: {
+          'line-color': '#FF0000',
+          'line-width': 3,
+          'line-opacity': 1
+        }
+      });
+
+      // Click handler to fetch and highlight parcel
+      map.current.on('click', async (e) => {
+        const { lng, lat } = e.lngLat;
+        console.log('Map clicked at:', lat, lng);
+
+        const token = process.env.NEXT_PUBLIC_REGRID_TOKEN;
+        if (!token) return;
+
+        try {
+          // Fetch parcel from Regrid
+          const response = await fetch(
+            `https://app.regrid.com/api/v2/parcels/point?lat=${lat}&lon=${lng}&token=${token}&return_geometry=true`
+          );
+
+          if (response.ok) {
+            const data = await response.json();
+            if (data && data.parcels && data.parcels.features && data.parcels.features.length > 0) {
+              const parcel = data.parcels.features[0];
+              console.log('Parcel found:', parcel.properties.headline || 'No address');
+
+              // Update the source with the parcel geometry
+              const source = map.current.getSource('clicked-parcel');
+              source.setData({
+                type: 'FeatureCollection',
+                features: [parcel]
+              });
+
+              // Show parcel info
+              alert(`Parcel: ${parcel.properties.headline || 'Unknown'}\nOwner: ${parcel.properties.fields?.owner || 'Unknown'}`);
+            } else {
+              console.log('No parcel found at this location');
+            }
           }
-        });
+        } catch (error) {
+          console.error('Error fetching parcel:', error);
+        }
+      });
 
-        // Try multiple possible source-layer names
-        const sourceLayerNames = ['parcel', 'parcels', 'default', 'regrid'];
-
-        sourceLayerNames.forEach((layerName, index) => {
-          try {
-            // Add parcel outline layer with different source-layer name
-            map.current.addLayer({
-              id: `regrid-parcels-outline-${index}`,
-              type: 'line',
-              source: 'regrid-parcels',
-              'source-layer': layerName,
-              paint: {
-                'line-color': '#FFD700',
-                'line-width': 1.5,
-                'line-opacity': 0.7
-              }
-            });
-            console.log(`Added outline layer with source-layer: ${layerName}`);
-          } catch (err) {
-            console.log(`Failed to add layer with source-layer ${layerName}:`, err.message);
-          }
-        });
-
-        console.log('Regrid parcel tile layer setup complete');
-      } else {
-        console.error('No Regrid token found for tile layer');
-      }
+      console.log('Click-to-highlight parcel feature ready!');
     });
   }, []);
 
