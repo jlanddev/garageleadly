@@ -39,20 +39,40 @@ export default function LeadsMap({ leads = [] }) {
   const fetchParcelData = async (lat, lng, leadStatus) => {
     try {
       const token = process.env.NEXT_PUBLIC_REGRID_TOKEN;
-      if (!token) return null;
+      if (!token) {
+        console.log('No Regrid token found');
+        return null;
+      }
 
-      const response = await fetch(
-        `https://app.regrid.com/api/v1/search/parcels/point.json?lat=${lat}&lon=${lng}&token=${token}`
-      );
+      // Regrid v2 API endpoint - correct format with query params
+      const url = `https://app.regrid.com/api/v2/parcels/point?lat=${lat}&lon=${lng}&token=${token}&return_geometry=true`;
+      console.log('Fetching parcel:', url.replace(token, 'TOKEN'));
 
-      if (!response.ok) return null;
+      const response = await fetch(url, {
+        headers: {
+          'accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Regrid API error:', response.status, response.statusText, errorText);
+        return null;
+      }
 
       const data = await response.json();
-      if (data && data.features && data.features.length > 0) {
-        const parcel = data.features[0];
+      console.log('Regrid response for', lat, lng, ':', data);
+
+      // Response format: { parcels: { type: "FeatureCollection", features: [...] } }
+      if (data && data.parcels && data.parcels.features && data.parcels.features.length > 0) {
+        const parcel = data.parcels.features[0];
         // Add status to parcel for color coding
+        if (!parcel.properties) parcel.properties = {};
         parcel.properties.leadStatus = leadStatus;
+        console.log('Successfully fetched parcel:', parcel.properties.headline || 'no address');
         return parcel;
+      } else {
+        console.log('No parcels found for coords:', lat, lng);
       }
     } catch (error) {
       console.error('Regrid API error:', error);
