@@ -16,7 +16,7 @@ function OnboardingContent() {
     company_name: '',
     phone: '',
     county: '',
-    daily_budget: '100',
+    leads_per_day: '3',
   });
 
   const handleSubmit = async (e) => {
@@ -54,26 +54,22 @@ function OnboardingContent() {
         />
         {/* Navy Blue Overlay */}
         <div className="absolute inset-0 bg-blue-900/60"></div>
-
-        {/* Logo */}
-        <div className="absolute top-8 left-8 z-10">
-          <Link href="/">
-            <Image src="/logo.png" alt="GarageLeadly" width={200} height={60} className="h-16 w-auto" />
-          </Link>
-        </div>
       </div>
 
       {/* Right Side - Payment Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white">
-        <div className="max-w-md w-full">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome to GarageLeadly</h1>
-            <p className="text-gray-600">Complete your membership to start receiving leads</p>
+        <div className="max-w-md w-full p-6 rounded-xl border-4 border-transparent bg-gradient-to-r from-blue-600 to-green-600 bg-clip-border" style={{background: 'linear-gradient(white, white) padding-box, linear-gradient(to right, #2563eb, #16a34a) border-box'}}>
+          {/* Header with Logo */}
+          <div className="mb-6">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-base font-medium text-gray-600">Welcome to</span>
+              <Image src="/logo.png" alt="GarageLeadly" width={180} height={45} className="h-10 w-auto" />
+            </div>
+            <p className="text-gray-600 text-sm">Complete your membership to start receiving leads</p>
           </div>
 
           {/* Pricing */}
-          <div className="bg-gray-50 rounded-lg p-6 mb-8">
+          <div className="bg-gray-50 rounded-lg p-4 mb-6">
             <div className="flex justify-between items-center mb-2">
               <span className="text-gray-700 font-medium">Annual membership</span>
               <span className="text-sm text-gray-500">1x</span>
@@ -83,67 +79,67 @@ function OnboardingContent() {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Company Name</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
               <input
                 type="text"
                 name="company_name"
                 required
                 value={formData.company_name}
                 onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                 placeholder="ABC Garage Doors"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
               <input
                 type="text"
                 name="name"
                 required
                 value={formData.name}
                 onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                 placeholder="John Smith"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
               <input
                 type="email"
                 name="email"
                 required
                 value={formData.email}
                 onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                 placeholder="you@company.com"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
               <input
                 type="tel"
                 name="phone"
                 required
                 value={formData.phone}
                 onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                 placeholder="(832) 555-1234"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Service Area</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Service Area</label>
               <select
                 name="county"
                 required
                 value={formData.county}
                 onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
               >
                 <option value="">Select county</option>
                 <option value="Harris">Harris County</option>
@@ -155,32 +151,34 @@ function OnboardingContent() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Daily Budget</label>
-              <div className="relative">
-                <span className="absolute left-4 top-3 text-gray-500">$</span>
-                <input
-                  type="number"
-                  name="daily_budget"
-                  required
-                  min="50"
-                  step="10"
-                  value={formData.daily_budget}
-                  onChange={handleInputChange}
-                  className="w-full border border-gray-300 rounded-lg pl-10 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
-                />
+              <label className="block text-sm font-medium text-gray-700 mb-2">Leads per day: <span className="text-blue-600 font-bold">{formData.leads_per_day}</span></label>
+              <input
+                type="range"
+                name="leads_per_day"
+                required
+                min="1"
+                max="10"
+                step="1"
+                value={formData.leads_per_day}
+                onChange={handleInputChange}
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+              />
+              <div className="flex justify-between text-xs text-gray-500 mt-1">
+                <span>1</span>
+                <span>5</span>
+                <span>10</span>
               </div>
-              <p className="mt-2 text-sm text-gray-500">Recommended: $100-150/day</p>
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-blue-600 to-green-600 text-white py-4 px-6 rounded-lg text-lg font-semibold hover:shadow-xl transition disabled:opacity-50 mt-6"
+              className="w-full bg-gradient-to-r from-blue-600 to-green-600 text-white py-3 px-6 rounded font-semibold hover:shadow-xl transition disabled:opacity-50 mt-4"
             >
               {loading ? 'Processing...' : 'Continue to Payment'}
             </button>
 
-            <div className="flex items-center justify-center gap-2 text-sm text-gray-500 mt-4">
+            <div className="flex items-center justify-center gap-2 text-sm text-gray-500 mt-3">
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
               </svg>

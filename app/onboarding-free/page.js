@@ -17,11 +17,64 @@ function OnboardingContent() {
     phone: '',
     county: '',
     leads_per_day: '3',
+    password: '',
+    confirmPassword: '',
   });
+
+  const getPasswordStrength = (password) => {
+    if (!password) return { strength: 0, label: '', color: '' };
+    let strength = 0;
+    if (password.length >= 8) strength++;
+    if (password.length >= 12) strength++;
+    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[^a-zA-Z0-9]/.test(password)) strength++;
+
+    if (strength <= 2) return { strength, label: 'Weak', color: 'bg-red-500' };
+    if (strength <= 3) return { strength, label: 'Fair', color: 'bg-yellow-500' };
+    if (strength <= 4) return { strength, label: 'Good', color: 'bg-blue-500' };
+    return { strength, label: 'Strong', color: 'bg-green-500' };
+  };
+
+  const validateEmail = async (email) => {
+    // Basic format check
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) return false;
+
+    // Check for disposable/invalid email domains
+    const disposableDomains = ['tempmail', 'throwaway', 'guerrillamail', 'mailinator', '10minutemail'];
+    const domain = email.split('@')[1]?.toLowerCase();
+    if (disposableDomains.some(d => domain?.includes(d))) return false;
+
+    return true;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+
+    // Validate email
+    const isValidEmail = await validateEmail(formData.email);
+    if (!isValidEmail) {
+      alert('Please enter a valid email address');
+      setLoading(false);
+      return;
+    }
+
+    // Validate passwords match
+    if (formData.password !== formData.confirmPassword) {
+      alert('Passwords do not match');
+      setLoading(false);
+      return;
+    }
+
+    // Validate password strength
+    const passwordStrength = getPasswordStrength(formData.password);
+    if (passwordStrength.strength < 3) {
+      alert('Password is too weak. Use at least 8 characters with uppercase, lowercase, and numbers.');
+      setLoading(false);
+      return;
+    }
 
     // Create the Stripe checkout session (card on file, no charge)
     const response = await fetch('/api/create-free-checkout', {
@@ -118,6 +171,49 @@ function OnboardingContent() {
                 className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                 placeholder="(832) 555-1234"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <input
+                type="password"
+                name="password"
+                required
+                value={formData.password}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                placeholder="Create a strong password"
+                minLength="8"
+              />
+              {formData.password && (
+                <div className="mt-2">
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="flex-1 bg-gray-200 rounded-full h-2">
+                      <div className={`h-2 rounded-full transition-all ${getPasswordStrength(formData.password).color}`} style={{width: `${(getPasswordStrength(formData.password).strength / 5) * 100}%`}}></div>
+                    </div>
+                    <span className={`text-xs font-medium ${getPasswordStrength(formData.password).strength <= 2 ? 'text-red-600' : getPasswordStrength(formData.password).strength <= 3 ? 'text-yellow-600' : getPasswordStrength(formData.password).strength <= 4 ? 'text-blue-600' : 'text-green-600'}`}>
+                      {getPasswordStrength(formData.password).label}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500">Use 8+ characters with uppercase, lowercase, numbers & symbols</p>
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+              <input
+                type="password"
+                name="confirmPassword"
+                required
+                value={formData.confirmPassword}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                placeholder="Re-enter your password"
+              />
+              {formData.confirmPassword && formData.password !== formData.confirmPassword && (
+                <p className="text-xs text-red-600 mt-1">Passwords do not match</p>
+              )}
             </div>
 
             <div>

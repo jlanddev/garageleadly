@@ -410,7 +410,7 @@ export default function LandingPage() {
             <a href="mailto:support@garageleadly.com" className="hover:text-white">support@garageleadly.com</a>
           </div>
           <div className="text-xs">
-            © 2024 GarageLeadly. All rights reserved.
+            © 2025 GarageLeadly. All rights reserved.
           </div>
         </div>
       </footer>
