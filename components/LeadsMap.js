@@ -123,12 +123,14 @@ export default function LeadsMap({ leads = [] }) {
       // Add Regrid parcel boundaries tile layer
       const token = process.env.NEXT_PUBLIC_REGRID_TOKEN;
       if (token) {
-        // Add Regrid vector tile source
+        console.log('Adding Regrid parcel tiles...');
+
+        // Add Regrid vector tile source - CORRECT endpoint
         map.current.addSource('regrid-parcels', {
           type: 'vector',
-          tiles: [`https://tiles.regrid.com/api/v1/tile/{z}/{x}/{y}.mvt?token=${token}`],
-          minzoom: 8,
-          maxzoom: 20
+          tiles: [`https://tiles.regrid.com/api/v1/parcels/{z}/{x}/{y}.mvt?token=${token}`],
+          minzoom: 10,
+          maxzoom: 21
         });
 
         // Add parcel fill layer (subtle)
@@ -136,7 +138,7 @@ export default function LeadsMap({ leads = [] }) {
           id: 'regrid-parcels-fill',
           type: 'fill',
           source: 'regrid-parcels',
-          'source-layer': 'parcels',
+          'source-layer': 'parcel',
           paint: {
             'fill-color': '#FFA500',
             'fill-opacity': 0.05
@@ -148,7 +150,7 @@ export default function LeadsMap({ leads = [] }) {
           id: 'regrid-parcels-outline',
           type: 'line',
           source: 'regrid-parcels',
-          'source-layer': 'parcels',
+          'source-layer': 'parcel',
           paint: {
             'line-color': '#FFD700',
             'line-width': 1,
@@ -156,7 +158,9 @@ export default function LeadsMap({ leads = [] }) {
           }
         });
 
-        console.log('Regrid parcel tile layer added');
+        console.log('Regrid parcel tile layer added successfully');
+      } else {
+        console.error('No Regrid token found for tile layer');
       }
     });
   }, []);
