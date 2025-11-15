@@ -152,45 +152,76 @@ export default function LeadsMap({ leads = [] }) {
         }
       });
 
+      // Change cursor on hover to indicate clickability
+      map.current.getCanvas().style.cursor = 'crosshair';
+
       // Click handler to fetch and highlight parcel
       map.current.on('click', async (e) => {
+        // Don't trigger if clicked on a marker
+        if (e.originalEvent.target.className.includes('marker')) return;
+
         const { lng, lat } = e.lngLat;
-        console.log('Map clicked at:', lat, lng);
+        console.log('🗺️ Map clicked at:', lat, lng);
 
         const token = process.env.NEXT_PUBLIC_REGRID_TOKEN;
-        if (!token) return;
+        if (!token) {
+          console.error('❌ No Regrid token found');
+          alert('Regrid token not configured');
+          return;
+        }
+
+        // Show loading state
+        map.current.getCanvas().style.cursor = 'wait';
 
         try {
+          console.log('📡 Fetching parcel data...');
+
           // Fetch parcel from Regrid
-          const response = await fetch(
-            `https://app.regrid.com/api/v2/parcels/point?lat=${lat}&lon=${lng}&token=${token}&return_geometry=true`
-          );
+          const url = `https://app.regrid.com/api/v2/parcels/point?lat=${lat}&lon=${lng}&token=${token}&return_geometry=true`;
+          const response = await fetch(url);
+
+          console.log('📥 Response status:', response.status);
 
           if (response.ok) {
             const data = await response.json();
+            console.log('📊 Response data:', data);
+
             if (data && data.parcels && data.parcels.features && data.parcels.features.length > 0) {
               const parcel = data.parcels.features[0];
-              console.log('Parcel found:', parcel.properties.headline || 'No address');
+              console.log('✅ Parcel found:', parcel.properties.headline || 'No address');
 
               // Update the source with the parcel geometry
               const source = map.current.getSource('clicked-parcel');
-              source.setData({
-                type: 'FeatureCollection',
-                features: [parcel]
-              });
+              if (source) {
+                source.setData({
+                  type: 'FeatureCollection',
+                  features: [parcel]
+                });
+                console.log('🎨 Parcel boundary drawn!');
+              }
 
               // Show parcel info
-              alert(`Parcel: ${parcel.properties.headline || 'Unknown'}\nOwner: ${parcel.properties.fields?.owner || 'Unknown'}`);
+              const address = parcel.properties.headline || 'Unknown address';
+              const owner = parcel.properties.fields?.owner || 'Unknown owner';
+              alert(`🏠 ${address}\n👤 Owner: ${owner}`);
             } else {
-              console.log('No parcel found at this location');
+              console.log('⚠️ No parcel found at this location');
+              alert('No parcel data available at this location');
             }
+          } else {
+            const errorText = await response.text();
+            console.error('❌ API Error:', response.status, errorText);
+            alert(`Error: ${response.status} - ${errorText.substring(0, 100)}`);
           }
         } catch (error) {
-          console.error('Error fetching parcel:', error);
+          console.error('❌ Error fetching parcel:', error);
+          alert('Error fetching parcel data: ' + error.message);
+        } finally {
+          map.current.getCanvas().style.cursor = 'crosshair';
         }
       });
 
-      console.log('Click-to-highlight parcel feature ready!');
+      console.log('✅ Click-to-highlight parcel feature ready!');
     });
   }, []);
 
