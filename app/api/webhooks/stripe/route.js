@@ -61,7 +61,55 @@ async function handleCheckoutCompleted(session) {
 
   if (session.mode === 'setup') {
     // Payment method setup completed
-    const contractorId = session.metadata?.contractor_id;
+    let contractorId = session.metadata?.contractor_id;
+
+    // Check if this is a free account setup (no existing contractor)
+    if (!contractorId && session.metadata?.free_account === 'true') {
+      console.log('📝 Creating new contractor from free signup');
+
+      // Create Stripe customer first
+      const customer = await stripe.customers.create({
+        email: session.customer_email,
+        name: session.metadata?.contractor_name,
+        metadata: {
+          company_name: session.metadata?.company_name,
+          phone: session.metadata?.phone,
+        },
+      });
+
+      // Create contractor record
+      const { data: newContractor, error } = await supabase
+        .from('contractors')
+        .insert([{
+          email: session.customer_email,
+          name: session.metadata?.contractor_name,
+          company_name: session.metadata?.company_name,
+          phone: session.metadata?.phone,
+          stripe_customer_id: customer.id,
+          county: session.metadata?.county,
+          daily_budget_cents: 0, // Free account - no budget yet
+          is_active: true,
+        }])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating contractor:', error);
+        return;
+      }
+
+      contractorId = newContractor.id;
+      console.log(`✅ Created contractor: ${contractorId}`);
+
+      // Create campaign
+      await supabase.from('campaigns').insert([{
+        contractor_id: contractorId,
+        leads_per_day: parseInt(session.metadata?.leads_per_day || '3'),
+        is_active: true,
+      }]);
+
+      console.log(`✅ Created campaign for contractor ${contractorId}`);
+    }
 
     if (!contractorId) {
       console.error('No contractor_id in session metadata');
@@ -74,6 +122,19 @@ async function handleCheckoutCompleted(session) {
 
     if (paymentMethodId) {
       const paymentMethod = await stripe.paymentMethods.retrieve(paymentMethodId);
+
+      // Attach payment method to customer
+      const { data: contractor } = await supabase
+        .from('contractors')
+        .select('stripe_customer_id')
+        .eq('id', contractorId)
+        .single();
+
+      if (contractor?.stripe_customer_id) {
+        await stripe.paymentMethods.attach(paymentMethodId, {
+          customer: contractor.stripe_customer_id,
+        });
+      }
 
       // Save payment method to database
       await supabase.from('payment_methods').insert([{
