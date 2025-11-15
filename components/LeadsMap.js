@@ -12,6 +12,7 @@ export default function LeadsMap({ leads = [] }) {
   const map = useRef(null);
   const markers = useRef([]);
   const [selectedLead, setSelectedLead] = useState(null);
+  const [selectedParcel, setSelectedParcel] = useState(null);
   const [is3D, setIs3D] = useState(false);
   const parcelsLoaded = useRef(false);
 
@@ -237,12 +238,30 @@ export default function LeadsMap({ leads = [] }) {
                   });
                 }
 
-                // Show parcel info
-                const address = parcel.properties.headline || 'Unknown address';
-                const owner = parcel.properties.fields?.owner || 'Unknown owner';
-                const acres = parcel.properties.fields?.acres ? parcel.properties.fields.acres.toFixed(2) : 'Unknown';
+                // Find associated lead if any (match by address or coordinates)
+                const associatedLead = leads.find(lead => {
+                  const parcelAddress = parcel.properties.headline?.toLowerCase() || '';
+                  const leadAddress = `${lead.address} ${lead.city}`.toLowerCase();
 
-                alert(`🏠 ${address}\n👤 Owner: ${owner}\n📐 ${acres} acres`);
+                  // Check if addresses match or coordinates are very close
+                  if (parcelAddress.includes(lead.address.toLowerCase())) return true;
+
+                  if (lead.latitude && lead.longitude) {
+                    const distance = Math.sqrt(
+                      Math.pow(lead.latitude - lat, 2) +
+                      Math.pow(lead.longitude - lng, 2)
+                    );
+                    return distance < 0.0001; // Very close coordinates
+                  }
+
+                  return false;
+                });
+
+                // Set selected parcel with associated lead data
+                setSelectedParcel({
+                  parcel,
+                  lead: associatedLead || null
+                });
               }
             }
           } catch (error) {
@@ -255,7 +274,7 @@ export default function LeadsMap({ leads = [] }) {
 
       console.log('✅ Click-to-highlight parcel feature ready!');
     });
-  }, []);
+  }, [leads]);
 
   // Toggle 3D view
   const toggle3D = () => {
@@ -526,6 +545,131 @@ export default function LeadsMap({ leads = [] }) {
                 {new Date(selectedLead.created_at).toLocaleDateString()}
               </span>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Property Summary Panel */}
+      {selectedParcel && (
+        <div className="absolute top-6 right-6 w-80 bg-gradient-to-b from-slate-900 to-slate-800 backdrop-blur-lg rounded-xl shadow-2xl border border-slate-700/50 z-20 overflow-hidden">
+          {/* Header */}
+          <div className="p-4 border-b border-slate-700/50 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+              </svg>
+              <h3 className="text-white font-bold">Property Summary</h3>
+            </div>
+            <button
+              onClick={() => {
+                setSelectedParcel(null);
+                // Clear the highlighted parcel
+                const source = map.current.getSource('clicked-parcel');
+                if (source) {
+                  source.setData({
+                    type: 'FeatureCollection',
+                    features: []
+                  });
+                }
+              }}
+              className="text-slate-400 hover:text-white transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Parcel Details */}
+          <div className="p-4 space-y-3 text-sm">
+            <div className="space-y-2">
+              <div className="flex justify-between items-center py-2 border-b border-slate-700/30">
+                <span className="text-slate-400">Location</span>
+                <span className="text-white font-medium text-right">
+                  {selectedParcel.parcel.properties.fields?.county || 'Unknown'}, TX
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center py-2 border-b border-slate-700/30">
+                <span className="text-slate-400">Acres</span>
+                <span className="text-white font-medium">
+                  {selectedParcel.parcel.properties.fields?.acres?.toFixed(2) || 'N/A'}
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center py-2 border-b border-slate-700/30">
+                <span className="text-slate-400">Parcel #</span>
+                <span className="text-white font-medium">
+                  {selectedParcel.parcel.properties.fields?.parcelnumb || 'N/A'}
+                </span>
+              </div>
+
+              <div className="py-2 border-b border-slate-700/30">
+                <div className="text-slate-400 mb-1">Owner</div>
+                <div className="text-white font-medium">
+                  {selectedParcel.parcel.properties.fields?.owner || 'Unknown'}
+                </div>
+              </div>
+
+              <div className="py-2 border-b border-slate-700/30">
+                <div className="text-slate-400 mb-1">Property Address</div>
+                <div className="text-white font-medium">
+                  {selectedParcel.parcel.properties.headline || 'Address not available'}
+                </div>
+              </div>
+            </div>
+
+            {/* Lead Information if associated */}
+            {selectedParcel.lead && (
+              <>
+                <div className="pt-3 border-t border-slate-600">
+                  <div className="flex items-center gap-2 mb-3">
+                    <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-green-400 font-semibold text-xs uppercase tracking-wide">Active Lead</span>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="py-2 border-b border-slate-700/30">
+                      <div className="text-slate-400 mb-1 text-xs">Contact Name</div>
+                      <div className="text-white font-medium">{selectedParcel.lead.name}</div>
+                    </div>
+
+                    <div className="py-2 border-b border-slate-700/30">
+                      <div className="text-slate-400 mb-1 text-xs">Phone</div>
+                      <div className="text-white font-medium">{selectedParcel.lead.phone}</div>
+                    </div>
+
+                    {selectedParcel.lead.email && (
+                      <div className="py-2 border-b border-slate-700/30">
+                        <div className="text-slate-400 mb-1 text-xs">Email</div>
+                        <div className="text-white font-medium text-xs">{selectedParcel.lead.email}</div>
+                      </div>
+                    )}
+
+                    <div className="py-2">
+                      <div className="text-slate-400 mb-1 text-xs">Issue Description</div>
+                      <div className="text-white text-sm">{selectedParcel.lead.issue_description}</div>
+                    </div>
+
+                    <div className="pt-2 flex items-center justify-between">
+                      <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                        selectedParcel.lead.status === 'new' ? 'bg-blue-500 text-white' :
+                        selectedParcel.lead.status === 'scheduled' ? 'bg-green-500 text-white' :
+                        selectedParcel.lead.status === 'called' ? 'bg-yellow-500 text-white' :
+                        'bg-gray-500 text-white'
+                      }`}>
+                        {selectedParcel.lead.status.toUpperCase()}
+                      </span>
+                      <span className="text-xs text-slate-400">
+                        {new Date(selectedParcel.lead.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
