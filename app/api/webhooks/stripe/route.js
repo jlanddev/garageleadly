@@ -58,6 +58,9 @@ export async function POST(request) {
 
 async function handleCheckoutCompleted(session) {
   console.log('✅ Checkout completed:', session.id);
+  console.log('📋 Session mode:', session.mode);
+  console.log('📋 Session metadata:', JSON.stringify(session.metadata));
+  console.log('📋 Customer email:', session.customer_email);
 
   if (session.mode === 'setup') {
     // Payment method setup completed
@@ -78,23 +81,28 @@ async function handleCheckoutCompleted(session) {
       });
 
       // Create contractor record
+      const contractorData = {
+        email: session.customer_email,
+        name: session.metadata?.contractor_name,
+        company_name: session.metadata?.company_name,
+        phone: session.metadata?.phone,
+        stripe_customer_id: customer.id,
+        county: session.metadata?.county,
+        daily_budget_cents: 0, // Free account - no budget yet
+        is_active: true,
+      };
+
+      console.log('📝 Attempting to create contractor with data:', JSON.stringify(contractorData));
+
       const { data: newContractor, error } = await supabase
         .from('contractors')
-        .insert([{
-          email: session.customer_email,
-          name: session.metadata?.contractor_name,
-          company_name: session.metadata?.company_name,
-          phone: session.metadata?.phone,
-          stripe_customer_id: customer.id,
-          county: session.metadata?.county,
-          daily_budget_cents: 0, // Free account - no budget yet
-          is_active: true,
-        }])
+        .insert([contractorData])
         .select()
         .single();
 
       if (error) {
-        console.error('Error creating contractor:', error);
+        console.error('❌ Error creating contractor:', JSON.stringify(error));
+        console.error('❌ Error details:', error.message, error.details, error.hint);
         return;
       }
 
