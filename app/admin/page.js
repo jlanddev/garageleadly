@@ -46,18 +46,28 @@ export default function AdminPage() {
   // Calculate metrics
   const todayLeads = leads.length;
   const assignedLeads = leads.filter(l => l.status === 'assigned').length;
-  const todayRevenue = transactions.reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-
-  // Mock Google Ads data (you'll integrate with Google Ads API later)
-  const googleAdsSpend = 450; // Daily spend
-  const googleClicks = 180;
-  const costPerClick = googleAdsSpend / googleClicks;
-  const costPerLead = todayLeads > 0 ? googleAdsSpend / todayLeads : 0;
-  const profit = todayRevenue - googleAdsSpend;
 
   // Calculate demand
   const totalDailyCap = contractors.reduce((sum, c) => sum + (c.daily_lead_cap || 0), 0);
   const demandFulfillment = totalDailyCap > 0 ? (todayLeads / totalDailyCap * 100) : 0;
+
+  const handleStatusChange = async (signupId, newStatus) => {
+    await supabase
+      .from('contractor_signups')
+      .update({ status: newStatus })
+      .eq('id', signupId);
+    fetchAllData();
+  };
+
+  const handleDeleteSignup = async (signupId) => {
+    if (confirm('Are you sure you want to delete this signup?')) {
+      await supabase
+        .from('contractor_signups')
+        .delete()
+        .eq('id', signupId);
+      fetchAllData();
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
@@ -104,39 +114,11 @@ export default function AdminPage() {
         {activeTab === 'overview' && (
           <div className="space-y-6">
             {/* Top Metrics */}
-            <div className="grid grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 gap-4 max-w-xs">
               <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg p-6">
                 <div className="text-3xl font-bold">{todayLeads}</div>
                 <div className="text-blue-200 text-sm">Leads Today</div>
                 <div className="text-xs text-blue-300 mt-2">{assignedLeads} assigned</div>
-              </div>
-
-              <div className="bg-gradient-to-br from-green-600 to-green-700 rounded-lg p-6">
-                <div className="text-3xl font-bold">${todayRevenue.toFixed(2)}</div>
-                <div className="text-green-200 text-sm">Revenue Today</div>
-                <div className="text-xs text-green-300 mt-2">${(todayRevenue / (todayLeads || 1)).toFixed(2)} per lead</div>
-              </div>
-
-              <div className="bg-gradient-to-br from-red-600 to-red-700 rounded-lg p-6">
-                <div className="text-3xl font-bold">${googleAdsSpend.toFixed(2)}</div>
-                <div className="text-red-200 text-sm">Google Ads Spend</div>
-                <div className="text-xs text-red-300 mt-2">${costPerClick.toFixed(2)} per click</div>
-              </div>
-
-              <div className="bg-gradient-to-br from-purple-600 to-purple-700 rounded-lg p-6">
-                <div className="text-3xl font-bold">${costPerLead.toFixed(2)}</div>
-                <div className="text-purple-200 text-sm">Cost Per Lead</div>
-                <div className="text-xs text-purple-300 mt-2">{googleClicks} clicks</div>
-              </div>
-
-              <div className={`bg-gradient-to-br rounded-lg p-6 ${profit >= 0 ? 'from-emerald-600 to-emerald-700' : 'from-orange-600 to-orange-700'}`}>
-                <div className="text-3xl font-bold">${profit.toFixed(2)}</div>
-                <div className={`text-sm ${profit >= 0 ? 'text-emerald-200' : 'text-orange-200'}`}>
-                  {profit >= 0 ? 'Profit' : 'Loss'} Today
-                </div>
-                <div className={`text-xs mt-2 ${profit >= 0 ? 'text-emerald-300' : 'text-orange-300'}`}>
-                  {((profit / todayRevenue) * 100 || 0).toFixed(1)}% margin
-                </div>
               </div>
             </div>
 
@@ -290,6 +272,7 @@ export default function AdminPage() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Contact</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">County</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-700">
@@ -306,9 +289,24 @@ export default function AdminPage() {
                       </td>
                       <td className="px-6 py-4 text-sm">{signup.county}</td>
                       <td className="px-6 py-4">
-                        <span className="px-3 py-1 rounded-full text-xs font-semibold capitalize bg-blue-600">
-                          {signup.status}
-                        </span>
+                        <select
+                          value={signup.status || 'new'}
+                          onChange={(e) => handleStatusChange(signup.id, e.target.value)}
+                          className="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm capitalize focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option value="new">New</option>
+                          <option value="contacted">Contacted</option>
+                          <option value="onboarded">Onboarded</option>
+                          <option value="rejected">Rejected</option>
+                        </select>
+                      </td>
+                      <td className="px-6 py-4">
+                        <button
+                          onClick={() => handleDeleteSignup(signup.id)}
+                          className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm font-medium transition"
+                        >
+                          Delete
+                        </button>
                       </td>
                     </tr>
                   ))}
