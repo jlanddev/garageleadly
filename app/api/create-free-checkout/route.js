@@ -17,9 +17,6 @@ export async function POST(request) {
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: email,
       password: password,
-      options: {
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard`,
-      },
     });
 
     if (authError) {
