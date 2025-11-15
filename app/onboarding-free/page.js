@@ -60,12 +60,10 @@ function OnboardingContent() {
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white">
         <div className="max-w-md w-full p-6 rounded-xl border-4 border-transparent bg-gradient-to-r from-blue-600 to-green-600 bg-clip-border" style={{background: 'linear-gradient(white, white) padding-box, linear-gradient(to right, #2563eb, #16a34a) border-box'}}>
           {/* Header with Logo */}
-          <div className="mb-6">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-base font-medium text-gray-600">Welcome to</span>
-              <Image src="/logo.png" alt="GarageLeadly" width={180} height={45} className="h-10 w-auto" />
-            </div>
-            <p className="text-gray-600 text-sm">Complete your setup to start receiving leads</p>
+          <div className="mb-6 text-center">
+            <Image src="/logo.png" alt="GarageLeadly" width={240} height={60} className="h-16 w-auto mx-auto mb-4" />
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Complete Your Setup</h1>
+            <p className="text-gray-600">Start receiving quality leads today</p>
           </div>
 
           {/* Form */}
