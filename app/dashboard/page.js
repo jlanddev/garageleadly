@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth, getLeads } from '@/lib/auth';
+import { supabase } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,20 +14,34 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
-    const currentUser = auth.getCurrentUser();
-    if (!currentUser) {
-      router.push('/login');
-      return;
-    }
-    setUser(currentUser);
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
 
-    // Fetch real leads from database
-    const fetchLeads = async () => {
-      const userLeads = await getLeads(currentUser.id);
+      if (!session) {
+        router.push('/login');
+        return;
+      }
+
+      // Fetch contractor by email
+      const { data: contractor } = await supabase
+        .from('contractors')
+        .select('*')
+        .eq('email', session.user.email)
+        .single();
+
+      if (!contractor) {
+        router.push('/login');
+        return;
+      }
+
+      setUser(contractor);
+
+      // Fetch real leads from database
+      const userLeads = await getLeads(contractor.id);
       setLeads(userLeads || []);
     };
 
-    fetchLeads();
+    checkAuth();
   }, []);
 
   const handleLogout = () => {
