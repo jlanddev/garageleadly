@@ -133,32 +133,40 @@ export default function LeadsMap({ leads = [] }) {
           maxzoom: 21
         });
 
-        // Add parcel fill layer (subtle)
-        map.current.addLayer({
-          id: 'regrid-parcels-fill',
-          type: 'fill',
-          source: 'regrid-parcels',
-          'source-layer': 'parcel',
-          paint: {
-            'fill-color': '#FFA500',
-            'fill-opacity': 0.05
+        // Debug: log source data
+        map.current.on('sourcedata', (e) => {
+          if (e.sourceId === 'regrid-parcels' && e.isSourceLoaded) {
+            console.log('Regrid source loaded:', e);
+            // Try to get layer names from the source
+            const source = map.current.getSource('regrid-parcels');
+            console.log('Source:', source);
           }
         });
 
-        // Add parcel outline layer (gold like land portal)
-        map.current.addLayer({
-          id: 'regrid-parcels-outline',
-          type: 'line',
-          source: 'regrid-parcels',
-          'source-layer': 'parcel',
-          paint: {
-            'line-color': '#FFD700',
-            'line-width': 1,
-            'line-opacity': 0.6
+        // Try multiple possible source-layer names
+        const sourceLayerNames = ['parcel', 'parcels', 'default', 'regrid'];
+
+        sourceLayerNames.forEach((layerName, index) => {
+          try {
+            // Add parcel outline layer with different source-layer name
+            map.current.addLayer({
+              id: `regrid-parcels-outline-${index}`,
+              type: 'line',
+              source: 'regrid-parcels',
+              'source-layer': layerName,
+              paint: {
+                'line-color': '#FFD700',
+                'line-width': 1.5,
+                'line-opacity': 0.7
+              }
+            });
+            console.log(`Added outline layer with source-layer: ${layerName}`);
+          } catch (err) {
+            console.log(`Failed to add layer with source-layer ${layerName}:`, err.message);
           }
         });
 
-        console.log('Regrid parcel tile layer added successfully');
+        console.log('Regrid parcel tile layer setup complete');
       } else {
         console.error('No Regrid token found for tile layer');
       }
