@@ -116,9 +116,48 @@ export default function LeadsMap({ leads = [] }) {
     // Add fullscreen control
     map.current.addControl(new mapboxgl.FullscreenControl(), 'top-right');
 
-    // Smooth transitions
+    // Smooth transitions and add parcel tile layer
     map.current.on('load', () => {
       map.current.resize();
+
+      // Add Regrid parcel boundaries tile layer
+      const token = process.env.NEXT_PUBLIC_REGRID_TOKEN;
+      if (token) {
+        // Add Regrid vector tile source
+        map.current.addSource('regrid-parcels', {
+          type: 'vector',
+          tiles: [`https://tiles.regrid.com/api/v1/tile/{z}/{x}/{y}.mvt?token=${token}`],
+          minzoom: 8,
+          maxzoom: 20
+        });
+
+        // Add parcel fill layer (subtle)
+        map.current.addLayer({
+          id: 'regrid-parcels-fill',
+          type: 'fill',
+          source: 'regrid-parcels',
+          'source-layer': 'parcels',
+          paint: {
+            'fill-color': '#FFA500',
+            'fill-opacity': 0.05
+          }
+        });
+
+        // Add parcel outline layer (gold like land portal)
+        map.current.addLayer({
+          id: 'regrid-parcels-outline',
+          type: 'line',
+          source: 'regrid-parcels',
+          'source-layer': 'parcels',
+          paint: {
+            'line-color': '#FFD700',
+            'line-width': 1,
+            'line-opacity': 0.6
+          }
+        });
+
+        console.log('Regrid parcel tile layer added');
+      }
     });
   }, []);
 
