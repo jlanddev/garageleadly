@@ -12,6 +12,7 @@ export default function LeadsMap({ leads = [] }) {
   const map = useRef(null);
   const markers = useRef([]);
   const [selectedLead, setSelectedLead] = useState(null);
+  const parcelsLoaded = useRef(false);
 
   // Geocode address using Nominatim (free, no API key needed)
   const geocodeAddress = async (address, city, zip) => {
@@ -29,6 +30,31 @@ export default function LeadsMap({ leads = [] }) {
       }
     } catch (error) {
       console.error('Geocoding error:', error);
+    }
+    return null;
+  };
+
+  // Fetch parcel data from Regrid API
+  const fetchParcelData = async (lat, lng, leadStatus) => {
+    try {
+      const token = process.env.NEXT_PUBLIC_REGRID_TOKEN;
+      if (!token) return null;
+
+      const response = await fetch(
+        `https://app.regrid.com/api/v1/search/parcels/point.json?lat=${lat}&lon=${lng}&token=${token}`
+      );
+
+      if (!response.ok) return null;
+
+      const data = await response.json();
+      if (data && data.features && data.features.length > 0) {
+        const parcel = data.features[0];
+        // Add status to parcel for color coding
+        parcel.properties.leadStatus = leadStatus;
+        return parcel;
+      }
+    } catch (error) {
+      console.error('Regrid API error:', error);
     }
     return null;
   };
@@ -56,10 +82,11 @@ export default function LeadsMap({ leads = [] }) {
 
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/streets-v12',
+      style: 'mapbox://styles/mapbox/satellite-streets-v12', // High-end satellite view
       center: [-95.3698, 29.7604], // Houston, TX
-      zoom: 9,
-      pitch: 0
+      zoom: 10,
+      pitch: 45, // 3D tilt for premium look
+      bearing: 0
     });
 
     // Add navigation controls
@@ -67,9 +94,14 @@ export default function LeadsMap({ leads = [] }) {
 
     // Add fullscreen control
     map.current.addControl(new mapboxgl.FullscreenControl(), 'top-right');
+
+    // Smooth transitions
+    map.current.on('load', () => {
+      map.current.resize();
+    });
   }, []);
 
-  // Update markers when leads change
+  // Update markers and parcels when leads change
   useEffect(() => {
     if (!map.current) return;
 
@@ -77,8 +109,21 @@ export default function LeadsMap({ leads = [] }) {
     markers.current.forEach(marker => marker.remove());
     markers.current = [];
 
-    // Add markers for each lead
-    leads.forEach(async (lead) => {
+    // Remove existing parcel layers and sources
+    if (map.current.getLayer('parcels-fill')) {
+      map.current.removeLayer('parcels-fill');
+    }
+    if (map.current.getLayer('parcels-outline')) {
+      map.current.removeLayer('parcels-outline');
+    }
+    if (map.current.getSource('parcels')) {
+      map.current.removeSource('parcels');
+    }
+
+    const parcelFeatures = [];
+
+    // Add markers and fetch parcels for each lead
+    leads.forEach(async (lead, index) => {
       // Try to get coordinates
       let coords = null;
 
@@ -91,21 +136,108 @@ export default function LeadsMap({ leads = [] }) {
 
       if (!coords) return;
 
-      // Create custom marker element
-      const el = document.createElement('div');
-      el.className = 'custom-marker';
-      el.style.width = '30px';
-      el.style.height = '30px';
-      el.style.borderRadius = '50%';
-      el.style.backgroundColor = getMarkerColor(lead.status);
-      el.style.border = '3px solid white';
-      el.style.boxShadow = '0 2px 10px rgba(0,0,0,0.3)';
-      el.style.cursor = 'pointer';
+      // Fetch parcel data from Regrid
+      const parcel = await fetchParcelData(coords.lat, coords.lng, lead.status);
+      if (parcel) {
+        parcelFeatures.push(parcel);
 
-      // Add pulsing animation for new leads
-      if (lead.status === 'new') {
-        el.style.animation = 'pulse 2s infinite';
+        // Add parcels to map after collecting all
+        if (index === leads.length - 1 || parcelFeatures.length === leads.length) {
+          setTimeout(() => {
+            if (map.current && parcelFeatures.length > 0) {
+              // Add source
+              if (!map.current.getSource('parcels')) {
+                map.current.addSource('parcels', {
+                  type: 'geojson',
+                  data: {
+                    type: 'FeatureCollection',
+                    features: parcelFeatures
+                  }
+                });
+
+                // Add fill layer
+                map.current.addLayer({
+                  id: 'parcels-fill',
+                  type: 'fill',
+                  source: 'parcels',
+                  paint: {
+                    'fill-color': [
+                      'match',
+                      ['get', 'leadStatus'],
+                      'new', '#3B82F6',
+                      'called', '#F59E0B',
+                      'scheduled', '#10B981',
+                      'completed', '#6B7280',
+                      '#EF4444'
+                    ],
+                    'fill-opacity': 0.15
+                  }
+                });
+
+                // Add outline layer
+                map.current.addLayer({
+                  id: 'parcels-outline',
+                  type: 'line',
+                  source: 'parcels',
+                  paint: {
+                    'line-color': [
+                      'match',
+                      ['get', 'leadStatus'],
+                      'new', '#3B82F6',
+                      'called', '#F59E0B',
+                      'scheduled', '#10B981',
+                      'completed', '#6B7280',
+                      '#EF4444'
+                    ],
+                    'line-width': 2.5,
+                    'line-opacity': 0.8
+                  }
+                });
+              }
+            }
+          }, 500);
+        }
       }
+
+      // Create premium marker with label
+      const el = document.createElement('div');
+      el.className = 'premium-marker';
+      el.innerHTML = `
+        <div style="
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          cursor: pointer;
+        ">
+          <div style="
+            background: ${getMarkerColor(lead.status)};
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 3px solid rgba(255,255,255,0.95);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 0 0 4px rgba(${
+              lead.status === 'new' ? '59, 130, 246' :
+              lead.status === 'scheduled' ? '16, 185, 129' :
+              lead.status === 'called' ? '245, 158, 11' : '107, 114, 128'
+            }, 0.2);
+            ${lead.status === 'new' ? 'animation: premiumPulse 2s infinite;' : ''}
+          "></div>
+          <div style="
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 6px;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+          ">${lead.name}</div>
+        </div>
+      `;
 
       // Create marker
       const marker = new mapboxgl.Marker(el)
@@ -125,86 +257,79 @@ export default function LeadsMap({ leads = [] }) {
     <div className="relative w-full h-full">
       <div ref={mapContainer} className="w-full h-full rounded-lg" />
 
-      {/* Add pulsing animation CSS */}
+      {/* Premium animations CSS */}
       <style jsx global>{`
-        @keyframes pulse {
+        @keyframes premiumPulse {
           0% {
-            box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 0 0 4px rgba(59, 130, 246, 0.2), 0 0 0 0 rgba(59, 130, 246, 0.4);
           }
-          70% {
-            box-shadow: 0 0 0 20px rgba(59, 130, 246, 0);
+          50% {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 0 0 4px rgba(59, 130, 246, 0.2), 0 0 0 12px rgba(59, 130, 246, 0);
           }
           100% {
-            box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 0 0 4px rgba(59, 130, 246, 0.2), 0 0 0 0 rgba(59, 130, 246, 0);
           }
         }
       `}</style>
 
-      {/* Lead details popup */}
+      {/* Premium Lead details popup */}
       {selectedLead && (
-        <div className="absolute top-4 left-4 bg-white rounded-lg shadow-2xl p-4 max-w-sm z-10">
+        <div className="absolute top-6 right-6 bg-white/95 backdrop-blur-lg rounded-xl shadow-2xl p-5 max-w-sm z-10 border border-gray-200">
           <button
             onClick={() => setSelectedLead(null)}
-            className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
+            className="absolute top-3 right-3 text-gray-400 hover:text-gray-700 transition-colors"
           >
-            ✕
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
 
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
               <div
-                className="w-4 h-4 rounded-full"
+                className="w-3 h-3 rounded-full flex-shrink-0"
                 style={{ backgroundColor: getMarkerColor(selectedLead.status) }}
               />
-              <span className="font-bold text-lg">{selectedLead.name}</span>
+              <span className="font-bold text-lg text-gray-900">{selectedLead.name}</span>
             </div>
 
-            <div className="text-sm text-gray-600">
-              <div>📞 {selectedLead.phone}</div>
-              <div>📍 {selectedLead.address}</div>
-              <div>🏘️ {selectedLead.city}, {selectedLead.zip}</div>
+            <div className="space-y-2 text-sm text-gray-700">
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                </svg>
+                {selectedLead.phone}
+              </div>
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                {selectedLead.address}, {selectedLead.city} {selectedLead.zip}
+              </div>
             </div>
 
-            <div className="text-sm">
-              <span className="font-semibold">Issue:</span> {selectedLead.issue_description}
+            <div className="text-sm bg-gray-50 rounded-lg p-3">
+              <div className="font-semibold text-gray-900 mb-1">Issue Description</div>
+              <div className="text-gray-700">{selectedLead.issue_description}</div>
             </div>
 
-            <div className="pt-2 border-t">
-              <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                selectedLead.status === 'new' ? 'bg-blue-100 text-blue-700' :
-                selectedLead.status === 'scheduled' ? 'bg-green-100 text-green-700' :
-                selectedLead.status === 'called' ? 'bg-yellow-100 text-yellow-700' :
-                'bg-gray-100 text-gray-700'
+            <div className="flex items-center justify-between pt-2 border-t">
+              <span className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${
+                selectedLead.status === 'new' ? 'bg-blue-500 text-white' :
+                selectedLead.status === 'scheduled' ? 'bg-green-500 text-white' :
+                selectedLead.status === 'called' ? 'bg-yellow-500 text-white' :
+                'bg-gray-500 text-white'
               }`}>
                 {selectedLead.status.toUpperCase()}
+              </span>
+              <span className="text-xs text-gray-500">
+                {new Date(selectedLead.created_at).toLocaleDateString()}
               </span>
             </div>
           </div>
         </div>
       )}
-
-      {/* Legend */}
-      <div className="absolute bottom-4 left-4 bg-white rounded-lg shadow-lg p-3 z-10">
-        <div className="text-xs font-semibold mb-2">Lead Status</div>
-        <div className="space-y-1 text-xs">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-blue-500" />
-            <span>New</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-yellow-500" />
-            <span>Called</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-green-500" />
-            <span>Scheduled</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-gray-500" />
-            <span>Completed</span>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
