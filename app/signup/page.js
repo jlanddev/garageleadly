@@ -42,8 +42,6 @@ export default function SignupPage() {
             phone: formData.phone,
             county: formData.county,
             current_leads: formData.currentLeads,
-            sms_consent: formData.smsConsent,
-            status: 'new',
           }]);
 
         if (error) {

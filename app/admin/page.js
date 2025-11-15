@@ -51,14 +51,6 @@ export default function AdminPage() {
   const totalDailyCap = contractors.reduce((sum, c) => sum + (c.daily_lead_cap || 0), 0);
   const demandFulfillment = totalDailyCap > 0 ? (todayLeads / totalDailyCap * 100) : 0;
 
-  const handleStatusChange = async (signupId, newStatus) => {
-    await supabase
-      .from('contractor_signups')
-      .update({ status: newStatus })
-      .eq('id', signupId);
-    fetchAllData();
-  };
-
   const handleDeleteSignup = async (signupId) => {
     if (confirm('Are you sure you want to delete this signup?')) {
       await supabase
@@ -289,7 +281,6 @@ export default function AdminPage() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Company</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Contact</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">County</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Status</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Actions</th>
                   </tr>
                 </thead>
@@ -306,18 +297,6 @@ export default function AdminPage() {
                         <div className="text-sm text-blue-400">{signup.phone}</div>
                       </td>
                       <td className="px-6 py-4 text-sm">{signup.county}</td>
-                      <td className="px-6 py-4">
-                        <select
-                          value={signup.status || 'new'}
-                          onChange={(e) => handleStatusChange(signup.id, e.target.value)}
-                          className="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm capitalize focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                          <option value="new">New</option>
-                          <option value="contacted">Contacted</option>
-                          <option value="onboarded">Onboarded</option>
-                          <option value="rejected">Rejected</option>
-                        </select>
-                      </td>
                       <td className="px-6 py-4">
                         <button
                           onClick={() => handleDeleteSignup(signup.id)}
