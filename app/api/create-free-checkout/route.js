@@ -13,7 +13,7 @@ export async function POST(request) {
       payment_method_types: ['card'],
       mode: 'setup',
       customer_email: email,
-      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard?setup_success=true`,
+      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/signup/success?free=true`,
       cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/onboarding-free?setup_canceled=true`,
       metadata: {
         contractor_name: name,
