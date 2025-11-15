@@ -581,7 +581,7 @@ export default function LeadsMap({ leads = [] }) {
           </div>
 
           {/* Parcel Details */}
-          <div className="p-4 space-y-3 text-sm">
+          <div className="p-4 space-y-3 text-sm max-h-[calc(100vh-120px)] overflow-y-auto">
             <div className="space-y-2">
               <div className="flex justify-between items-center py-2 border-b border-slate-700/30">
                 <span className="text-slate-400">Location</span>
@@ -597,12 +597,48 @@ export default function LeadsMap({ leads = [] }) {
                 </span>
               </div>
 
+              {selectedParcel.parcel.properties.fields?.ll_gisacre && (
+                <div className="flex justify-between items-center py-2 border-b border-slate-700/30">
+                  <span className="text-slate-400">GIS Acres</span>
+                  <span className="text-white font-medium">
+                    {selectedParcel.parcel.properties.fields.ll_gisacre.toFixed(2)}
+                  </span>
+                </div>
+              )}
+
+              {selectedParcel.parcel.properties.fields?.sqft && (
+                <div className="flex justify-between items-center py-2 border-b border-slate-700/30">
+                  <span className="text-slate-400">Lot Size (sqft)</span>
+                  <span className="text-white font-medium">
+                    {selectedParcel.parcel.properties.fields.sqft.toLocaleString()}
+                  </span>
+                </div>
+              )}
+
               <div className="flex justify-between items-center py-2 border-b border-slate-700/30">
                 <span className="text-slate-400">Parcel #</span>
                 <span className="text-white font-medium">
                   {selectedParcel.parcel.properties.fields?.parcelnumb || 'N/A'}
                 </span>
               </div>
+
+              {selectedParcel.parcel.properties.fields?.usedesc && (
+                <div className="py-2 border-b border-slate-700/30">
+                  <div className="text-slate-400 mb-1">Land Use</div>
+                  <div className="text-white font-medium">
+                    {selectedParcel.parcel.properties.fields.usedesc}
+                  </div>
+                </div>
+              )}
+
+              {selectedParcel.parcel.properties.fields?.zoning && (
+                <div className="flex justify-between items-center py-2 border-b border-slate-700/30">
+                  <span className="text-slate-400">Zoning</span>
+                  <span className="text-white font-medium">
+                    {selectedParcel.parcel.properties.fields.zoning}
+                  </span>
+                </div>
+              )}
 
               <div className="py-2 border-b border-slate-700/30">
                 <div className="text-slate-400 mb-1">Owner</div>
@@ -611,12 +647,66 @@ export default function LeadsMap({ leads = [] }) {
                 </div>
               </div>
 
+              {selectedParcel.parcel.properties.fields?.mailadd && (
+                <div className="py-2 border-b border-slate-700/30">
+                  <div className="text-slate-400 mb-1">Owner Mailing Address</div>
+                  <div className="text-white text-xs">
+                    {selectedParcel.parcel.properties.fields.mailadd}
+                  </div>
+                </div>
+              )}
+
               <div className="py-2 border-b border-slate-700/30">
                 <div className="text-slate-400 mb-1">Property Address</div>
                 <div className="text-white font-medium">
                   {selectedParcel.parcel.properties.headline || 'Address not available'}
                 </div>
               </div>
+
+              {selectedParcel.parcel.properties.fields?.saleprice && (
+                <div className="flex justify-between items-center py-2 border-b border-slate-700/30">
+                  <span className="text-slate-400">Last Sale Price</span>
+                  <span className="text-green-400 font-medium">
+                    ${selectedParcel.parcel.properties.fields.saleprice.toLocaleString()}
+                  </span>
+                </div>
+              )}
+
+              {selectedParcel.parcel.properties.fields?.saledate && (
+                <div className="flex justify-between items-center py-2 border-b border-slate-700/30">
+                  <span className="text-slate-400">Sale Date</span>
+                  <span className="text-white font-medium">
+                    {selectedParcel.parcel.properties.fields.saledate}
+                  </span>
+                </div>
+              )}
+
+              {selectedParcel.parcel.properties.fields?.assessedval && (
+                <div className="flex justify-between items-center py-2 border-b border-slate-700/30">
+                  <span className="text-slate-400">Assessed Value</span>
+                  <span className="text-white font-medium">
+                    ${selectedParcel.parcel.properties.fields.assessedval.toLocaleString()}
+                  </span>
+                </div>
+              )}
+
+              {selectedParcel.parcel.properties.fields?.marketval && (
+                <div className="flex justify-between items-center py-2 border-b border-slate-700/30">
+                  <span className="text-slate-400">Market Value</span>
+                  <span className="text-white font-medium">
+                    ${selectedParcel.parcel.properties.fields.marketval.toLocaleString()}
+                  </span>
+                </div>
+              )}
+
+              {selectedParcel.parcel.properties.fields?.taxamt && (
+                <div className="flex justify-between items-center py-2 border-b border-slate-700/30">
+                  <span className="text-slate-400">Tax Amount</span>
+                  <span className="text-white font-medium">
+                    ${selectedParcel.parcel.properties.fields.taxamt.toLocaleString()}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Lead Information if associated */}
