@@ -82,14 +82,14 @@ async function handleCheckoutCompleted(session) {
 
       // Create contractor record
       const contractorData = {
+        id: session.metadata?.auth_user_id, // Link to auth user
         email: session.customer_email,
         name: session.metadata?.contractor_name,
         company_name: session.metadata?.company_name,
         phone: session.metadata?.phone,
         stripe_customer_id: customer.id,
-        county: session.metadata?.county,
-        daily_budget_cents: 0, // Free account - no budget yet
-        is_active: true,
+        counties: session.metadata?.county ? [session.metadata.county] : [],
+        status: 'active',
       };
 
       console.log('📝 Attempting to create contractor with data:', JSON.stringify(contractorData));
