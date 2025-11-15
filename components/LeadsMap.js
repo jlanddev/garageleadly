@@ -104,8 +104,8 @@ export default function LeadsMap({ leads = [] }) {
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/satellite-streets-v12', // High-end satellite view
-      center: [-95.3698, 29.7604], // Houston, TX
-      zoom: 10,
+      center: [-96.7970, 32.7767], // Dallas, TX (Dallas County - included in trial)
+      zoom: 11,
       pitch: 0, // Start flat, toggle for 3D
       bearing: 0
     });
@@ -119,6 +119,48 @@ export default function LeadsMap({ leads = [] }) {
     // Smooth transitions and click-to-highlight parcel
     map.current.on('load', () => {
       map.current.resize();
+
+      // Add Regrid vector tile layer for all parcels (if tiles API is available)
+      const token = process.env.NEXT_PUBLIC_REGRID_TOKEN;
+      if (token) {
+        try {
+          map.current.addSource('regrid-parcels', {
+            type: 'vector',
+            tiles: [`https://tiles.regrid.com/api/v1/parcels/{z}/{x}/{y}.mvt?token=${token}`],
+            minzoom: 10,
+            maxzoom: 22
+          });
+
+          // Add parcel fill layer
+          map.current.addLayer({
+            id: 'regrid-parcel-fill',
+            type: 'fill',
+            source: 'regrid-parcels',
+            'source-layer': 'parcels',
+            paint: {
+              'fill-color': '#ffffff',
+              'fill-opacity': 0.05
+            }
+          });
+
+          // Add parcel borders
+          map.current.addLayer({
+            id: 'regrid-parcel-borders',
+            type: 'line',
+            source: 'regrid-parcels',
+            'source-layer': 'parcels',
+            paint: {
+              'line-color': '#88ccff',
+              'line-width': 1,
+              'line-opacity': 0.5
+            }
+          });
+
+          console.log('✅ Regrid vector tile layer added');
+        } catch (error) {
+          console.error('❌ Failed to add Regrid vector tiles (may require tiles API subscription):', error);
+        }
+      }
 
       // Add empty source for clicked parcel
       map.current.addSource('clicked-parcel', {
@@ -186,6 +228,9 @@ export default function LeadsMap({ leads = [] }) {
             const data = await response.json();
             console.log('📊 Response data:', data);
 
+            // Debug: Show the raw response structure
+            alert(`Debug - Response:\n${JSON.stringify(data, null, 2).substring(0, 500)}`);
+
             if (data && data.parcels && data.parcels.features && data.parcels.features.length > 0) {
               const parcel = data.parcels.features[0];
               console.log('✅ Parcel found:', parcel.properties.headline || 'No address');
@@ -205,8 +250,8 @@ export default function LeadsMap({ leads = [] }) {
               const owner = parcel.properties.fields?.owner || 'Unknown owner';
               alert(`🏠 ${address}\n👤 Owner: ${owner}`);
             } else {
-              console.log('⚠️ No parcel found at this location');
-              alert('No parcel data available at this location');
+              console.log('⚠️ No parcel found - data structure:', JSON.stringify(data));
+              alert(`No parcel found.\nData keys: ${Object.keys(data).join(', ')}\nParcels: ${data.parcels ? 'exists' : 'missing'}`);
             }
           } else {
             const errorText = await response.text();
@@ -262,7 +307,7 @@ export default function LeadsMap({ leads = [] }) {
         // Get coordinates
         let coords = null;
         if (!lead.latitude || !lead.longitude) {
-          coords = await geocodeAddress(lead.address, lead.city || 'Houston', lead.zip);
+          coords = await geocodeAddress(lead.address, lead.city || 'Dallas', lead.zip);
         } else {
           coords = { lng: lead.longitude, lat: lead.latitude };
         }
