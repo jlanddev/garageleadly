@@ -85,7 +85,7 @@ export default function DashboardPage() {
       <header className="bg-white shadow-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
-            <img src="/logo.png" alt="GarageLeadly" className="h-10" />
+            <img src="/logo.png" alt="GarageLeadly" className="h-16" />
             <div className="flex items-center gap-4">
               <div className="text-right">
                 <div className="text-sm text-gray-600">{user.companyName}</div>
