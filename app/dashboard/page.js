@@ -83,17 +83,17 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white shadow-sm">
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-4 py-3 sm:py-4">
           <div className="flex justify-between items-center">
-            <img src="/logo.png" alt="GarageLeadly" className="h-16" />
-            <div className="flex items-center gap-4">
-              <div className="text-right">
-                <div className="text-sm text-gray-600">{user.companyName}</div>
+            <img src="/logo.png" alt="GarageLeadly" className="h-12 sm:h-14 md:h-16" />
+            <div className="flex items-center gap-2 sm:gap-4">
+              <div className="text-right hidden sm:block">
+                <div className="text-xs sm:text-sm text-gray-600">{user.companyName}</div>
                 <div className="text-xs text-gray-500">{user.county}</div>
               </div>
               <button
                 onClick={handleLogout}
-                className="text-sm text-gray-600 hover:text-gray-900"
+                className="text-xs sm:text-sm text-gray-600 hover:text-gray-900 bg-gray-100 px-3 py-2 rounded"
               >
                 Logout
               </button>
@@ -103,12 +103,12 @@ export default function DashboardPage() {
       </header>
 
       {/* Navigation Tabs */}
-      <div className="bg-white border-b">
+      <div className="bg-white border-b overflow-x-auto">
         <div className="container mx-auto px-4">
-          <div className="flex gap-8">
+          <div className="flex gap-4 sm:gap-8 min-w-max sm:min-w-0">
             <button
               onClick={() => setActiveTab('overview')}
-              className={`py-4 border-b-2 font-medium ${
+              className={`py-3 sm:py-4 border-b-2 font-medium text-sm sm:text-base whitespace-nowrap ${
                 activeTab === 'overview'
                   ? 'border-blue-600 text-blue-600'
                   : 'border-transparent text-gray-600 hover:text-gray-900'
@@ -118,7 +118,7 @@ export default function DashboardPage() {
             </button>
             <button
               onClick={() => setActiveTab('leads')}
-              className={`py-4 border-b-2 font-medium ${
+              className={`py-3 sm:py-4 border-b-2 font-medium text-sm sm:text-base whitespace-nowrap ${
                 activeTab === 'leads'
                   ? 'border-blue-600 text-blue-600'
                   : 'border-transparent text-gray-600 hover:text-gray-900'
@@ -128,7 +128,7 @@ export default function DashboardPage() {
             </button>
             <button
               onClick={() => setActiveTab('settings')}
-              className={`py-4 border-b-2 font-medium ${
+              className={`py-3 sm:py-4 border-b-2 font-medium text-sm sm:text-base whitespace-nowrap ${
                 activeTab === 'settings'
                   ? 'border-blue-600 text-blue-600'
                   : 'border-transparent text-gray-600 hover:text-gray-900'
@@ -145,53 +145,53 @@ export default function DashboardPage() {
         {activeTab === 'overview' && (
           <div>
             {/* Stats Grid */}
-            <div className="grid md:grid-cols-4 gap-6 mb-8">
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <div className="text-sm text-gray-600 mb-1">Total Leads</div>
-                <div className="text-3xl font-bold text-gray-900">{totalLeads}</div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8">
+              <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm">
+                <div className="text-xs sm:text-sm text-gray-600 mb-1">Total Leads</div>
+                <div className="text-2xl sm:text-3xl font-bold text-gray-900">{totalLeads}</div>
               </div>
 
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <div className="text-sm text-gray-600 mb-1">Total Spent</div>
-                <div className="text-3xl font-bold text-gray-900">
+              <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm">
+                <div className="text-xs sm:text-sm text-gray-600 mb-1">Total Spent</div>
+                <div className="text-2xl sm:text-3xl font-bold text-gray-900">
                   ${totalSpent.toLocaleString()}
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <div className="text-sm text-gray-600 mb-1">Total Revenue</div>
-                <div className="text-3xl font-bold text-green-600">
+              <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm">
+                <div className="text-xs sm:text-sm text-gray-600 mb-1">Total Revenue</div>
+                <div className="text-2xl sm:text-3xl font-bold text-green-600">
                   ${totalRevenue.toLocaleString()}
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <div className="text-sm text-gray-600 mb-1">Close Rate</div>
-                <div className="text-3xl font-bold text-blue-600">{closeRate}%</div>
+              <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm">
+                <div className="text-xs sm:text-sm text-gray-600 mb-1">Close Rate</div>
+                <div className="text-2xl sm:text-3xl font-bold text-blue-600">{closeRate}%</div>
               </div>
             </div>
 
             {/* ROI Card */}
-            <div className="bg-gradient-to-br from-blue-600 to-blue-700 text-white p-8 rounded-lg shadow-lg mb-8">
-              <div className="grid md:grid-cols-3 gap-6">
+            <div className="bg-gradient-to-br from-blue-600 to-blue-700 text-white p-4 sm:p-6 md:p-8 rounded-lg shadow-lg mb-6 sm:mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
                 <div>
-                  <div className="text-blue-100 mb-2">Return on Investment</div>
-                  <div className="text-4xl font-bold">{roi}%</div>
-                  <div className="text-sm text-blue-100 mt-2">
+                  <div className="text-xs sm:text-sm text-blue-100 mb-2">Return on Investment</div>
+                  <div className="text-3xl sm:text-4xl font-bold">{roi}%</div>
+                  <div className="text-xs sm:text-sm text-blue-100 mt-2">
                     ${totalRevenue.toLocaleString()} revenue / ${totalSpent.toLocaleString()} spent
                   </div>
                 </div>
 
                 <div>
-                  <div className="text-blue-100 mb-2">Average Job Value</div>
-                  <div className="text-4xl font-bold">${avgLeadValue}</div>
-                  <div className="text-sm text-blue-100 mt-2">Per closed lead</div>
+                  <div className="text-xs sm:text-sm text-blue-100 mb-2">Average Job Value</div>
+                  <div className="text-3xl sm:text-4xl font-bold">${avgLeadValue}</div>
+                  <div className="text-xs sm:text-sm text-blue-100 mt-2">Per closed lead</div>
                 </div>
 
                 <div>
-                  <div className="text-blue-100 mb-2">Daily Budget</div>
-                  <div className="text-4xl font-bold">${user.dailyBudget || 200}</div>
-                  <div className="text-sm text-blue-100 mt-2">
+                  <div className="text-xs sm:text-sm text-blue-100 mb-2">Daily Budget</div>
+                  <div className="text-3xl sm:text-4xl font-bold">${user.dailyBudget || 200}</div>
+                  <div className="text-xs sm:text-sm text-blue-100 mt-2">
                     Spent today: ${Math.floor(totalSpent / 7)}
                   </div>
                 </div>

@@ -66,56 +66,56 @@ export default function LandingPage() {
           <div className="inline-block bg-gradient-to-r from-blue-600 to-green-600 text-white px-6 py-2 rounded-full text-sm font-semibold mb-6 animate-pulse">
             Houston Launch - First 20 Contractors Only
           </div>
-          <h1 className="text-5xl md:text-7xl font-black text-gray-900 mb-6 leading-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-black text-gray-900 mb-6 leading-tight">
             Stop Fighting For Leads.<br />
             <span className="bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
               Get Them Delivered.
             </span>
           </h1>
-          <p className="text-2xl md:text-3xl text-gray-700 mb-8 max-w-4xl mx-auto font-semibold">
-            100% exclusive garage door leads sent to your phone in 30 seconds.<br/>
+          <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-gray-700 mb-8 max-w-4xl mx-auto font-semibold">
+            100% exclusive garage door leads sent to your phone in 30 seconds.<br className="hidden sm:block"/>
             <span className="text-gray-600 font-normal">Territory-protected. No sharing. No competition.</span>
           </p>
         </div>
 
         {/* How It Works - Horizontal Bars */}
         <div className="max-w-6xl mx-auto mb-12 space-y-4">
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-2xl p-6 shadow-xl hover:shadow-2xl transition">
-            <div className="flex items-center gap-6">
-              <div className="flex-shrink-0 w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center">
-                <span className="text-4xl font-black">1</span>
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-2xl p-4 sm:p-6 shadow-xl hover:shadow-2xl transition">
+            <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+              <div className="flex-shrink-0 w-12 h-12 sm:w-16 sm:h-16 bg-white/20 rounded-xl flex items-center justify-center">
+                <span className="text-3xl sm:text-4xl font-black">1</span>
               </div>
-              <div>
-                <h3 className="text-2xl font-bold mb-2">We Run The Ads, You Get The Calls</h3>
-                <p className="text-blue-100 text-lg">
+              <div className="text-center sm:text-left">
+                <h3 className="text-xl sm:text-2xl font-bold mb-2">We Run The Ads, You Get The Calls</h3>
+                <p className="text-blue-100 text-base sm:text-lg">
                   Set your daily lead cap in the dashboard. We handle all the advertising, landing pages, and customer screening. You just answer the phone.
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-gradient-to-r from-green-600 to-green-700 text-white rounded-2xl p-6 shadow-xl hover:shadow-2xl transition">
-            <div className="flex items-center gap-6">
-              <div className="flex-shrink-0 w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center">
-                <span className="text-4xl font-black">2</span>
+          <div className="bg-gradient-to-r from-green-600 to-green-700 text-white rounded-2xl p-4 sm:p-6 shadow-xl hover:shadow-2xl transition">
+            <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+              <div className="flex-shrink-0 w-12 h-12 sm:w-16 sm:h-16 bg-white/20 rounded-xl flex items-center justify-center">
+                <span className="text-3xl sm:text-4xl font-black">2</span>
               </div>
-              <div>
-                <h3 className="text-2xl font-bold mb-2">Exclusive Leads Delivered in 30 Seconds</h3>
-                <p className="text-green-100 text-lg">
+              <div className="text-center sm:text-left">
+                <h3 className="text-xl sm:text-2xl font-bold mb-2">Exclusive Leads Delivered in 30 Seconds</h3>
+                <p className="text-green-100 text-base sm:text-lg">
                   Every lead is 100% exclusive to you. SMS hits your phone instantly with customer's name, number, address, and issue. Nobody else ever sees it.
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-2xl p-6 shadow-xl hover:shadow-2xl transition">
-            <div className="flex items-center gap-6">
-              <div className="flex-shrink-0 w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center">
-                <span className="text-4xl font-black">3</span>
+          <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-2xl p-4 sm:p-6 shadow-xl hover:shadow-2xl transition">
+            <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+              <div className="flex-shrink-0 w-12 h-12 sm:w-16 sm:h-16 bg-white/20 rounded-xl flex items-center justify-center">
+                <span className="text-3xl sm:text-4xl font-black">3</span>
               </div>
-              <div>
-                <h3 className="text-2xl font-bold mb-2">Close Jobs, Track Everything, Scale Up</h3>
-                <p className="text-purple-100 text-lg">
+              <div className="text-center sm:text-left">
+                <h3 className="text-xl sm:text-2xl font-bold mb-2">Close Jobs, Track Everything, Scale Up</h3>
+                <p className="text-purple-100 text-base sm:text-lg">
                   Fix garages and make money. Track every lead, job, and dollar in your dashboard. See your ROI. Adjust your daily cap. Total control.
                 </p>
               </div>
@@ -229,10 +229,10 @@ export default function LandingPage() {
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
                 Professional Dashboard + Complete CRM
               </h2>
-              <p className="text-xl text-gray-600">
+              <p className="text-base sm:text-lg md:text-xl text-gray-600">
                 Track every lead, every job, every dollar. Everything you need to run your garage door business.
               </p>
             </div>
@@ -247,22 +247,22 @@ export default function LandingPage() {
                 </div>
 
                 {/* Stats Cards */}
-                <div className="p-6 grid md:grid-cols-4 gap-4">
-                  <div className="bg-blue-50 p-4 rounded-lg">
-                    <div className="text-sm text-gray-600">Total Leads</div>
-                    <div className="text-3xl font-bold text-blue-600">47</div>
+                <div className="p-4 sm:p-6 grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+                  <div className="bg-blue-50 p-3 sm:p-4 rounded-lg">
+                    <div className="text-xs sm:text-sm text-gray-600">Total Leads</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-blue-600">47</div>
                   </div>
-                  <div className="bg-green-50 p-4 rounded-lg">
-                    <div className="text-sm text-gray-600">Jobs Closed</div>
-                    <div className="text-3xl font-bold text-green-600">32</div>
+                  <div className="bg-green-50 p-3 sm:p-4 rounded-lg">
+                    <div className="text-xs sm:text-sm text-gray-600">Jobs Closed</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-green-600">32</div>
                   </div>
-                  <div className="bg-purple-50 p-4 rounded-lg">
-                    <div className="text-sm text-gray-600">Close Rate</div>
-                    <div className="text-3xl font-bold text-purple-600">68%</div>
+                  <div className="bg-purple-50 p-3 sm:p-4 rounded-lg">
+                    <div className="text-xs sm:text-sm text-gray-600">Close Rate</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-purple-600">68%</div>
                   </div>
-                  <div className="bg-orange-50 p-4 rounded-lg">
-                    <div className="text-sm text-gray-600">ROI</div>
-                    <div className="text-3xl font-bold text-orange-600">4.2x</div>
+                  <div className="bg-orange-50 p-3 sm:p-4 rounded-lg">
+                    <div className="text-xs sm:text-sm text-gray-600">ROI</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-orange-600">4.2x</div>
                   </div>
                 </div>
 
@@ -305,18 +305,18 @@ export default function LandingPage() {
             </div>
 
             {/* Features Grid */}
-            <div className="grid md:grid-cols-3 gap-6 mt-12">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
               <div className="text-center">
-                <h3 className="font-bold text-lg mb-2">Lead CRM</h3>
-                <p className="text-gray-600">Track every lead from first call to job completion. Update status, add notes, record job values.</p>
+                <h3 className="font-bold text-base sm:text-lg mb-2">Lead CRM</h3>
+                <p className="text-sm sm:text-base text-gray-600">Track every lead from first call to job completion. Update status, add notes, record job values.</p>
               </div>
               <div className="text-center">
-                <h3 className="font-bold text-lg mb-2">ROI Analytics</h3>
-                <p className="text-gray-600">See exactly how much you spend vs. how much you make. Know your numbers like a pro.</p>
+                <h3 className="font-bold text-base sm:text-lg mb-2">ROI Analytics</h3>
+                <p className="text-sm sm:text-base text-gray-600">See exactly how much you spend vs. how much you make. Know your numbers like a pro.</p>
               </div>
               <div className="text-center">
-                <h3 className="font-bold text-lg mb-2">Budget Control</h3>
-                <p className="text-gray-600">Set daily budgets, pause anytime, adjust on the fly. You're in complete control.</p>
+                <h3 className="font-bold text-base sm:text-lg mb-2">Budget Control</h3>
+                <p className="text-sm sm:text-base text-gray-600">Set daily budgets, pause anytime, adjust on the fly. You're in complete control.</p>
               </div>
             </div>
           </div>
@@ -327,14 +327,14 @@ export default function LandingPage() {
       {/* Why Join */}
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center text-gray-900 mb-12">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-gray-900 mb-12">
             Why Top Contractors Choose GarageLeadly
           </h2>
 
-          <div className="max-w-lg mx-auto bg-gradient-to-br from-blue-600 to-green-600 rounded-2xl shadow-2xl p-8 text-white">
+          <div className="max-w-lg mx-auto bg-gradient-to-br from-blue-600 to-green-600 rounded-2xl shadow-2xl p-6 sm:p-8 text-white">
             <div className="text-center mb-8">
-              <div className="text-3xl font-bold mb-4">Join Houston's Elite Garage Door Network</div>
-              <div className="text-blue-100">We're building a network of the best operators in the market</div>
+              <div className="text-2xl sm:text-3xl font-bold mb-4">Join Houston's Elite Garage Door Network</div>
+              <div className="text-sm sm:text-base text-blue-100">We're building a network of the best operators in the market</div>
             </div>
 
             <div className="mb-8">
@@ -376,18 +376,18 @@ export default function LandingPage() {
       {/* Final CTA */}
       <section className="bg-gray-900 text-white py-20">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold mb-6">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-6">
             Ready to Join Houston's Top Garage Door Contractors?
           </h2>
-          <p className="text-xl text-gray-300 mb-4 max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl text-gray-300 mb-4 max-w-2xl mx-auto">
             We're looking for the best operators in the Houston market.
           </p>
-          <p className="text-lg text-gray-400 mb-8 max-w-2xl mx-auto">
+          <p className="text-sm sm:text-base md:text-lg text-gray-400 mb-8 max-w-2xl mx-auto">
             Book a call to see a live demo and discuss if we're a fit. Get exclusive leads delivered instantly to your phone. Track everything in your professional dashboard.
           </p>
           <Link
             href="/signup"
-            className="inline-block bg-gradient-to-r from-blue-600 to-green-600 text-white px-12 py-5 rounded-xl text-xl font-bold hover:shadow-2xl transform hover:scale-105 transition"
+            className="inline-block bg-gradient-to-r from-blue-600 to-green-600 text-white px-8 sm:px-12 py-4 sm:py-5 rounded-xl text-lg sm:text-xl font-bold hover:shadow-2xl transform hover:scale-105 transition"
           >
             Book Your Call
           </Link>

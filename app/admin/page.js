@@ -64,32 +64,32 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       {/* Header */}
-      <div className="bg-gray-800 border-b border-gray-700 px-6 py-4">
+      <div className="bg-gray-800 border-b border-gray-700 px-4 py-3 sm:px-6 sm:py-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">GarageLeadly Operations</h1>
-            <p className="text-gray-400 text-sm">Live Business Dashboard</p>
+            <h1 className="text-lg sm:text-xl md:text-2xl font-bold">GarageLeadly Operations</h1>
+            <p className="text-gray-400 text-xs sm:text-sm hidden sm:block">Live Business Dashboard</p>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="text-right">
-              <div className="text-sm text-gray-400">Last Updated</div>
-              <div className="text-sm font-mono">{new Date().toLocaleTimeString()}</div>
+          <div className="flex items-center gap-2 sm:gap-4">
+            <div className="text-right hidden md:block">
+              <div className="text-xs sm:text-sm text-gray-400">Last Updated</div>
+              <div className="text-xs sm:text-sm font-mono">{new Date().toLocaleTimeString()}</div>
             </div>
-            <Link href="/" className="bg-gray-700 px-4 py-2 rounded hover:bg-gray-600">
-              Exit Admin
+            <Link href="/" className="bg-gray-700 px-3 py-2 sm:px-4 rounded hover:bg-gray-600 text-xs sm:text-sm">
+              Exit
             </Link>
           </div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="bg-gray-800 border-b border-gray-700 px-6">
-        <div className="flex gap-4">
+      <div className="bg-gray-800 border-b border-gray-700 px-4 sm:px-6 overflow-x-auto">
+        <div className="flex gap-2 sm:gap-4 min-w-max sm:min-w-0">
           {['overview', 'live-feed', 'signups', 'calendar'].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-3 font-medium capitalize border-b-2 transition ${
+              className={`px-3 sm:px-4 py-3 font-medium capitalize border-b-2 transition text-xs sm:text-sm whitespace-nowrap ${
                 activeTab === tab
                   ? 'border-blue-500 text-blue-400'
                   : 'border-transparent text-gray-400 hover:text-white'
