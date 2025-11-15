@@ -114,11 +114,29 @@ export default function AdminPage() {
         {activeTab === 'overview' && (
           <div className="space-y-6">
             {/* Top Metrics */}
-            <div className="grid grid-cols-1 gap-4 max-w-xs">
+            <div className="grid grid-cols-4 gap-4">
               <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg p-6">
                 <div className="text-3xl font-bold">{todayLeads}</div>
                 <div className="text-blue-200 text-sm">Leads Today</div>
                 <div className="text-xs text-blue-300 mt-2">{assignedLeads} assigned</div>
+              </div>
+
+              <div className="bg-gradient-to-br from-green-600 to-green-700 rounded-lg p-6">
+                <div className="text-3xl font-bold">$0.00</div>
+                <div className="text-green-200 text-sm">Revenue Today</div>
+                <div className="text-xs text-green-300 mt-2">$0.00 per lead</div>
+              </div>
+
+              <div className="bg-gradient-to-br from-red-600 to-red-700 rounded-lg p-6">
+                <div className="text-3xl font-bold">$0.00</div>
+                <div className="text-red-200 text-sm">Google Ads Spend</div>
+                <div className="text-xs text-red-300 mt-2">$0.00 per click</div>
+              </div>
+
+              <div className="bg-gradient-to-br from-purple-600 to-purple-700 rounded-lg p-6">
+                <div className="text-3xl font-bold">$0.00</div>
+                <div className="text-purple-200 text-sm">Cost Per Lead</div>
+                <div className="text-xs text-purple-300 mt-2">0 clicks</div>
               </div>
             </div>
 
