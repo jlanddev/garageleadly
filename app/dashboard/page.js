@@ -4,6 +4,13 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth, getLeads } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
+import dynamicImport from 'next/dynamic';
+
+// Dynamically import map to avoid SSR issues
+const LeadsMap = dynamicImport(() => import('@/components/LeadsMap'), {
+  ssr: false,
+  loading: () => <div className="w-full h-96 bg-gray-100 rounded-lg animate-pulse" />
+});
 
 export const dynamic = 'force-dynamic';
 
@@ -168,6 +175,19 @@ export default function DashboardPage() {
               <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm">
                 <div className="text-xs sm:text-sm text-gray-600 mb-1">Close Rate</div>
                 <div className="text-2xl sm:text-3xl font-bold text-blue-600">{closeRate}%</div>
+              </div>
+            </div>
+
+            {/* Live Map View */}
+            <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-6 sm:mb-8">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Live Lead Map</h3>
+                <div className="text-xs sm:text-sm text-gray-500">
+                  {leads.length} {leads.length === 1 ? 'lead' : 'leads'} on map
+                </div>
+              </div>
+              <div className="h-96 sm:h-[500px] rounded-lg overflow-hidden">
+                <LeadsMap leads={leads} />
               </div>
             </div>
 
