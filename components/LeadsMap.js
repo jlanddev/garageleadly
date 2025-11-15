@@ -12,6 +12,7 @@ export default function LeadsMap({ leads = [] }) {
   const map = useRef(null);
   const markers = useRef([]);
   const [selectedLead, setSelectedLead] = useState(null);
+  const [is3D, setIs3D] = useState(false);
   const parcelsLoaded = useRef(false);
 
   // Geocode address using Nominatim (free, no API key needed)
@@ -85,7 +86,7 @@ export default function LeadsMap({ leads = [] }) {
       style: 'mapbox://styles/mapbox/satellite-streets-v12', // High-end satellite view
       center: [-95.3698, 29.7604], // Houston, TX
       zoom: 10,
-      pitch: 45, // 3D tilt for premium look
+      pitch: 0, // Start flat, toggle for 3D
       bearing: 0
     });
 
@@ -101,161 +102,204 @@ export default function LeadsMap({ leads = [] }) {
     });
   }, []);
 
+  // Toggle 3D view
+  const toggle3D = () => {
+    if (!map.current) return;
+    const newIs3D = !is3D;
+    setIs3D(newIs3D);
+
+    map.current.easeTo({
+      pitch: newIs3D ? 60 : 0,
+      duration: 1000
+    });
+  };
+
   // Update markers and parcels when leads change
   useEffect(() => {
     if (!map.current) return;
 
-    // Clear existing markers
-    markers.current.forEach(marker => marker.remove());
-    markers.current = [];
+    const loadLeadsAndParcels = async () => {
+      // Clear existing markers
+      markers.current.forEach(marker => marker.remove());
+      markers.current = [];
 
-    // Remove existing parcel layers and sources
-    if (map.current.getLayer('parcels-fill')) {
-      map.current.removeLayer('parcels-fill');
-    }
-    if (map.current.getLayer('parcels-outline')) {
-      map.current.removeLayer('parcels-outline');
-    }
-    if (map.current.getSource('parcels')) {
-      map.current.removeSource('parcels');
-    }
-
-    const parcelFeatures = [];
-
-    // Add markers and fetch parcels for each lead
-    leads.forEach(async (lead, index) => {
-      // Try to get coordinates
-      let coords = null;
-
-      // If lead doesn't have coordinates, geocode it
-      if (!lead.latitude || !lead.longitude) {
-        coords = await geocodeAddress(lead.address, lead.city || 'Houston', lead.zip);
-      } else {
-        coords = { lng: lead.longitude, lat: lead.latitude };
+      // Remove existing parcel layers and sources
+      if (map.current.getLayer('parcels-fill')) {
+        map.current.removeLayer('parcels-fill');
+      }
+      if (map.current.getLayer('parcels-outline')) {
+        map.current.removeLayer('parcels-outline');
+      }
+      if (map.current.getSource('parcels')) {
+        map.current.removeSource('parcels');
       }
 
-      if (!coords) return;
-
-      // Fetch parcel data from Regrid
-      const parcel = await fetchParcelData(coords.lat, coords.lng, lead.status);
-      if (parcel) {
-        parcelFeatures.push(parcel);
-
-        // Add parcels to map after collecting all
-        if (index === leads.length - 1 || parcelFeatures.length === leads.length) {
-          setTimeout(() => {
-            if (map.current && parcelFeatures.length > 0) {
-              // Add source
-              if (!map.current.getSource('parcels')) {
-                map.current.addSource('parcels', {
-                  type: 'geojson',
-                  data: {
-                    type: 'FeatureCollection',
-                    features: parcelFeatures
-                  }
-                });
-
-                // Add fill layer
-                map.current.addLayer({
-                  id: 'parcels-fill',
-                  type: 'fill',
-                  source: 'parcels',
-                  paint: {
-                    'fill-color': [
-                      'match',
-                      ['get', 'leadStatus'],
-                      'new', '#3B82F6',
-                      'called', '#F59E0B',
-                      'scheduled', '#10B981',
-                      'completed', '#6B7280',
-                      '#EF4444'
-                    ],
-                    'fill-opacity': 0.15
-                  }
-                });
-
-                // Add outline layer
-                map.current.addLayer({
-                  id: 'parcels-outline',
-                  type: 'line',
-                  source: 'parcels',
-                  paint: {
-                    'line-color': [
-                      'match',
-                      ['get', 'leadStatus'],
-                      'new', '#3B82F6',
-                      'called', '#F59E0B',
-                      'scheduled', '#10B981',
-                      'completed', '#6B7280',
-                      '#EF4444'
-                    ],
-                    'line-width': 2.5,
-                    'line-opacity': 0.8
-                  }
-                });
-              }
-            }
-          }, 500);
+      // Process all leads and fetch parcels
+      const parcelPromises = leads.map(async (lead) => {
+        // Get coordinates
+        let coords = null;
+        if (!lead.latitude || !lead.longitude) {
+          coords = await geocodeAddress(lead.address, lead.city || 'Houston', lead.zip);
+        } else {
+          coords = { lng: lead.longitude, lat: lead.latitude };
         }
-      }
 
-      // Create premium marker with label
-      const el = document.createElement('div');
-      el.className = 'premium-marker';
-      el.innerHTML = `
-        <div style="
-          position: relative;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          cursor: pointer;
-        ">
-          <div style="
-            background: ${getMarkerColor(lead.status)};
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            border: 3px solid rgba(255,255,255,0.95);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 0 0 4px rgba(${
-              lead.status === 'new' ? '59, 130, 246' :
-              lead.status === 'scheduled' ? '16, 185, 129' :
-              lead.status === 'called' ? '245, 158, 11' : '107, 114, 128'
-            }, 0.2);
-            ${lead.status === 'new' ? 'animation: premiumPulse 2s infinite;' : ''}
-          "></div>
-          <div style="
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(10px);
-            color: white;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 600;
-            margin-top: 6px;
-            white-space: nowrap;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.1);
-          ">${lead.name}</div>
-        </div>
-      `;
+        if (!coords) {
+          console.log('No coords for lead:', lead.name);
+          return { coords: null, parcel: null, lead };
+        }
 
-      // Create marker
-      const marker = new mapboxgl.Marker(el)
-        .setLngLat([coords.lng, coords.lat])
-        .addTo(map.current);
+        // Fetch parcel data
+        const parcel = await fetchParcelData(coords.lat, coords.lng, lead.status);
+        console.log('Fetched parcel for', lead.name, ':', parcel ? 'success' : 'failed');
 
-      // Add click event
-      el.addEventListener('click', () => {
-        setSelectedLead(lead);
+        return { coords, parcel, lead };
       });
 
-      markers.current.push(marker);
-    });
+      const results = await Promise.all(parcelPromises);
+
+      const parcelFeatures = [];
+
+      // Add markers and collect parcels
+      results.forEach(({ coords, parcel, lead }) => {
+        if (!coords) return;
+
+        // Collect parcel if available
+        if (parcel) {
+          parcelFeatures.push(parcel);
+        }
+
+        // Create premium marker with label
+        const el = document.createElement('div');
+        el.className = 'premium-marker';
+        el.innerHTML = `
+          <div style="
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+          ">
+            <div style="
+              background: ${getMarkerColor(lead.status)};
+              width: 14px;
+              height: 14px;
+              border-radius: 50%;
+              border: 3px solid rgba(255,255,255,0.95);
+              box-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 0 0 4px rgba(${
+                lead.status === 'new' ? '59, 130, 246' :
+                lead.status === 'scheduled' ? '16, 185, 129' :
+                lead.status === 'called' ? '245, 158, 11' : '107, 114, 128'
+              }, 0.2);
+              ${lead.status === 'new' ? 'animation: premiumPulse 2s infinite;' : ''}
+            "></div>
+            <div style="
+              background: rgba(0, 0, 0, 0.85);
+              backdrop-filter: blur(10px);
+              color: white;
+              padding: 4px 10px;
+              border-radius: 6px;
+              font-size: 11px;
+              font-weight: 600;
+              margin-top: 6px;
+              white-space: nowrap;
+              box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+              border: 1px solid rgba(255,255,255,0.1);
+            ">${lead.name}</div>
+          </div>
+        `;
+
+        // Create marker
+        const marker = new mapboxgl.Marker(el)
+          .setLngLat([coords.lng, coords.lat])
+          .addTo(map.current);
+
+        // Add click event
+        el.addEventListener('click', () => {
+          setSelectedLead(lead);
+        });
+
+        markers.current.push(marker);
+      });
+
+      // Add parcel boundaries to map
+      if (parcelFeatures.length > 0 && map.current) {
+        console.log('Adding', parcelFeatures.length, 'parcels to map');
+
+        map.current.addSource('parcels', {
+          type: 'geojson',
+          data: {
+            type: 'FeatureCollection',
+            features: parcelFeatures
+          }
+        });
+
+        // Add fill layer
+        map.current.addLayer({
+          id: 'parcels-fill',
+          type: 'fill',
+          source: 'parcels',
+          paint: {
+            'fill-color': [
+              'match',
+              ['get', 'leadStatus'],
+              'new', '#3B82F6',
+              'called', '#F59E0B',
+              'scheduled', '#10B981',
+              'completed', '#6B7280',
+              '#EF4444'
+            ],
+            'fill-opacity': 0.15
+          }
+        });
+
+        // Add outline layer
+        map.current.addLayer({
+          id: 'parcels-outline',
+          type: 'line',
+          source: 'parcels',
+          paint: {
+            'line-color': [
+              'match',
+              ['get', 'leadStatus'],
+              'new', '#3B82F6',
+              'called', '#F59E0B',
+              'scheduled', '#10B981',
+              'completed', '#6B7280',
+              '#EF4444'
+            ],
+            'line-width': 2.5,
+            'line-opacity': 0.8
+          }
+        });
+      } else {
+        console.log('No parcels to display');
+      }
+    };
+
+    loadLeadsAndParcels();
   }, [leads]);
 
   return (
     <div className="relative w-full h-full">
       <div ref={mapContainer} className="w-full h-full rounded-lg" />
+
+      {/* 3D Toggle Button */}
+      <button
+        onClick={toggle3D}
+        className={`absolute top-4 left-4 z-10 px-4 py-2 rounded-lg font-semibold shadow-lg transition-all ${
+          is3D
+            ? 'bg-blue-500 text-white hover:bg-blue-600'
+            : 'bg-white/95 text-gray-700 hover:bg-white border border-gray-300'
+        }`}
+      >
+        <div className="flex items-center gap-2">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+          </svg>
+          <span>{is3D ? '2D View' : '3D View'}</span>
+        </div>
+      </button>
 
       {/* Premium animations CSS */}
       <style jsx global>{`
