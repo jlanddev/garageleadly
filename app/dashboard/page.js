@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { auth, getLeads } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 import dynamicImport from 'next/dynamic';
+import CampaignManager from '@/components/CampaignManager';
 
 // Dynamically import map to avoid SSR issues
 const LeadsMap = dynamicImport(() => import('@/components/LeadsMap'), {
@@ -18,7 +19,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState(null);
   const [leads, setLeads] = useState([]);
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('leads');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [filterStatus, setFilterStatus] = useState('all');
 
@@ -123,8 +124,41 @@ export default function DashboardPage() {
         </div>
       </header>
 
+      {/* Main Tab Bar */}
+      <div className="bg-slate-900 border-b border-slate-700 px-6">
+        <div className="flex gap-1">
+          <button
+            onClick={() => setActiveTab('leads')}
+            className={`px-6 py-3 font-semibold text-sm transition ${
+              activeTab === 'leads'
+                ? 'text-white border-b-2 border-blue-500 bg-slate-800/50'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            Leads & Map
+          </button>
+          <button
+            onClick={() => setActiveTab('campaigns')}
+            className={`px-6 py-3 font-semibold text-sm transition ${
+              activeTab === 'campaigns'
+                ? 'text-white border-b-2 border-blue-500 bg-slate-800/50'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            Campaigns
+          </button>
+        </div>
+      </div>
+
+      {/* Campaigns Tab */}
+      {activeTab === 'campaigns' && (
+        <div className="flex-1 bg-slate-900 p-6 overflow-y-auto">
+          <CampaignManager contractorId={user.id} />
+        </div>
+      )}
+
       {/* Main Layout: Sidebar + Map */}
-      <div className="flex-1 flex overflow-hidden relative">
+      {activeTab === 'leads' && <div className="flex-1 flex overflow-hidden relative">
         {/* Premium Dark Sidebar */}
         <aside className={`
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
@@ -296,7 +330,7 @@ export default function DashboardPage() {
             onClick={() => setSidebarOpen(false)}
           />
         )}
-      </div>
+      </div>}
 
       {/* Settings Modal */}
       {activeTab === 'settings' && (
