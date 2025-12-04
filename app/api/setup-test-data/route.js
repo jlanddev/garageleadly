@@ -8,26 +8,42 @@ const supabase = createClient(
 
 export async function POST() {
   try {
-    // Step 1: Delete all leads first (foreign key constraint)
-    await supabase.from('leads').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    // Get Jordan's contractor ID to preserve
+    const { data: jordan } = await supabase
+      .from('contractors')
+      .select('id')
+      .eq('email', 'jordan@landreach.co')
+      .single();
 
-    // Step 2: Delete transactions
-    await supabase.from('transactions').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    const jordanId = jordan?.id;
+
+    // Step 1: Delete transactions (references leads)
+    const { error: txError } = await supabase.from('transactions').delete().gt('created_at', '2000-01-01');
+    if (txError) console.log('TX delete error:', txError.message);
+
+    // Step 2: Delete leads (references contractors)
+    const { error: leadsError } = await supabase.from('leads').delete().gt('submitted_at', '2000-01-01');
+    if (leadsError) console.log('Leads delete error:', leadsError.message);
 
     // Step 3: Delete daily_lead_counts
-    await supabase.from('daily_lead_counts').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    const { error: countsError } = await supabase.from('daily_lead_counts').delete().gt('date', '2000-01-01');
+    if (countsError) console.log('Counts delete error:', countsError.message);
 
     // Step 4: Delete campaigns
-    await supabase.from('campaigns').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    const { error: campaignsError } = await supabase.from('campaigns').delete().gt('created_at', '2000-01-01');
+    if (campaignsError) console.log('Campaigns delete error:', campaignsError.message);
 
-    // Step 5: Delete all contractors except jordan@landreach.co
+    // Step 5: Delete payment_methods if exists
+    await supabase.from('payment_methods').delete().gt('created_at', '2000-01-01').catch(() => {});
+
+    // Step 6: Delete all contractors except jordan
     const { error: deleteError } = await supabase
       .from('contractors')
       .delete()
       .neq('email', 'jordan@landreach.co');
 
     if (deleteError) {
-      return NextResponse.json({ error: 'Delete failed: ' + deleteError.message }, { status: 500 });
+      return NextResponse.json({ error: 'Delete failed: ' + deleteError.message, jordanId }, { status: 500 });
     }
 
     // Counties to set up
