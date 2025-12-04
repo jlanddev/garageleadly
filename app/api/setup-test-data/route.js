@@ -34,7 +34,11 @@ export async function POST() {
     if (campaignsError) console.log('Campaigns delete error:', campaignsError.message);
 
     // Step 5: Delete payment_methods if exists
-    await supabase.from('payment_methods').delete().gt('created_at', '2000-01-01').catch(() => {});
+    try {
+      await supabase.from('payment_methods').delete().gt('created_at', '2000-01-01');
+    } catch (e) {
+      // Table may not exist
+    }
 
     // Step 6: Delete all contractors except jordan
     const { error: deleteError } = await supabase
