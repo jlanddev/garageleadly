@@ -83,8 +83,21 @@ function OnboardingContent() {
       body: JSON.stringify(formData),
     });
 
-    const { url } = await response.json();
-    window.location.href = url;
+    const data = await response.json();
+
+    if (data.error) {
+      alert(data.error);
+      setLoading(false);
+      return;
+    }
+
+    if (!data.url) {
+      alert('Something went wrong. Please try again.');
+      setLoading(false);
+      return;
+    }
+
+    window.location.href = data.url;
   };
 
   const handleInputChange = (e) => {
