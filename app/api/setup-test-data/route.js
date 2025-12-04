@@ -8,7 +8,19 @@ const supabase = createClient(
 
 export async function POST() {
   try {
-    // Step 1: Delete all contractors except jordan@landreach.co
+    // Step 1: Delete all leads first (foreign key constraint)
+    await supabase.from('leads').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+
+    // Step 2: Delete transactions
+    await supabase.from('transactions').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+
+    // Step 3: Delete daily_lead_counts
+    await supabase.from('daily_lead_counts').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+
+    // Step 4: Delete campaigns
+    await supabase.from('campaigns').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+
+    // Step 5: Delete all contractors except jordan@landreach.co
     const { error: deleteError } = await supabase
       .from('contractors')
       .delete()
@@ -17,12 +29,6 @@ export async function POST() {
     if (deleteError) {
       return NextResponse.json({ error: 'Delete failed: ' + deleteError.message }, { status: 500 });
     }
-
-    // Step 2: Delete all daily_lead_counts
-    await supabase.from('daily_lead_counts').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-
-    // Step 3: Delete all test leads
-    await supabase.from('leads').delete().neq('id', '00000000-0000-0000-0000-000000000000');
 
     // Counties to set up
     const counties = ['Harris', 'Montgomery', 'Fort Bend', 'Galveston', 'Brazoria'];
