@@ -245,7 +245,7 @@ export default function DashboardPage() {
                           <span className="truncate">{lead.address}</span>
                         </div>
                         <div className="text-xs text-slate-400 mt-2 line-clamp-2 leading-relaxed">
-                          {lead.issue_description}
+                          {lead.issue || lead.issue_description}
                         </div>
                         <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-700/50">
                           <span className={`px-2 py-0.5 text-xs font-semibold rounded ${

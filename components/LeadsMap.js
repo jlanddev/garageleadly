@@ -200,7 +200,7 @@ export default function LeadsMap({ leads = [] }) {
 
             <div className="text-sm bg-gray-50 rounded-lg p-3">
               <div className="font-semibold text-gray-900 mb-1">Issue</div>
-              <div className="text-gray-700">{selectedLead.issue_description}</div>
+              <div className="text-gray-700">{selectedLead.issue || selectedLead.issue_description}</div>
             </div>
 
             <div className="flex items-center justify-between pt-2 border-t">
