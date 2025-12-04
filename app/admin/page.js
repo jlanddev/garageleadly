@@ -6,12 +6,15 @@ import Link from 'next/link';
 
 export default function AdminPage() {
   const [leads, setLeads] = useState([]);
+  const [unassignedLeads, setUnassignedLeads] = useState([]);
   const [contractors, setContractors] = useState([]);
+  const [campaigns, setCampaigns] = useState([]);
   const [signups, setSignups] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  const [pushing, setPushing] = useState(null);
 
   useEffect(() => {
     fetchAllData();
@@ -27,16 +30,20 @@ export default function AdminPage() {
     // Fetch leads from today
     const today = new Date().toISOString().split('T')[0];
 
-    const [leadsRes, contractorsRes, signupsRes, transactionsRes, bookingsRes] = await Promise.all([
+    const [leadsRes, unassignedRes, contractorsRes, campaignsRes, signupsRes, transactionsRes, bookingsRes] = await Promise.all([
       supabase.from('leads').select('*').gte('submitted_at', today + 'T00:00:00').order('submitted_at', { ascending: false }),
+      supabase.from('leads').select('*').eq('status', 'unassigned').order('submitted_at', { ascending: false }),
       supabase.from('contractors').select('*').eq('status', 'active'),
+      supabase.from('campaigns').select('*').eq('status', 'active'),
       supabase.from('contractor_signups').select('*').order('submitted_at', { ascending: false }).limit(20),
       supabase.from('transactions').select('*').gte('created_at', today + 'T00:00:00').eq('type', 'lead_charge'),
       supabase.from('calendar_bookings').select('*').order('scheduled_date', { ascending: true }).limit(50),
     ]);
 
     setLeads(leadsRes.data || []);
+    setUnassignedLeads(unassignedRes.data || []);
     setContractors(contractorsRes.data || []);
+    setCampaigns(campaignsRes.data || []);
     setSignups(signupsRes.data || []);
     setTransactions(transactionsRes.data || []);
     setBookings(bookingsRes.data || []);
@@ -58,6 +65,51 @@ export default function AdminPage() {
         .delete()
         .eq('id', signupId);
       fetchAllData();
+    }
+  };
+
+  const handleManualPush = async (leadId, contractorId) => {
+    setPushing(leadId);
+    try {
+      const contractor = contractors.find(c => c.id === contractorId);
+      if (!contractor) {
+        alert('Contractor not found');
+        return;
+      }
+
+      // Update lead with contractor assignment
+      const { error: updateError } = await supabase
+        .from('leads')
+        .update({
+          contractor_id: contractorId,
+          status: 'assigned',
+          assigned_at: new Date().toISOString(),
+          notes: 'Manually assigned by admin'
+        })
+        .eq('id', leadId);
+
+      if (updateError) throw updateError;
+
+      // Send email notification to contractor via SendGrid
+      const lead = unassignedLeads.find(l => l.id === leadId);
+      if (lead && contractor.email) {
+        await fetch('/api/send-sms', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: contractor.email,
+            message: `🔧 NEW LEAD - GarageLeadly\n\nName: ${lead.name}\nPhone: ${lead.phone}\nEmail: ${lead.email}\n\nAddress: ${lead.address}\nCity: ${lead.city}\nCounty: ${lead.county}\nZIP: ${lead.zip}\n\nType: ${lead.job_type}\nIssue: ${lead.issue}\n\nCALL NOW - They're expecting your call!`
+          })
+        });
+      }
+
+      fetchAllData();
+      alert(`Lead pushed to ${contractor.company_name || contractor.name}`);
+    } catch (error) {
+      console.error('Manual push error:', error);
+      alert('Failed to push lead: ' + error.message);
+    } finally {
+      setPushing(null);
     }
   };
 
@@ -85,7 +137,7 @@ export default function AdminPage() {
       {/* Tabs */}
       <div className="bg-gray-800 border-b border-gray-700 px-4 sm:px-6 overflow-x-auto">
         <div className="flex gap-2 sm:gap-4 min-w-max sm:min-w-0">
-          {['overview', 'live-feed', 'signups', 'calendar'].map((tab) => (
+          {['overview', 'unassigned', 'live-feed', 'signups', 'calendar'].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -198,6 +250,97 @@ export default function AdminPage() {
                 )}
               </div>
             </div>
+          </div>
+        )}
+
+        {/* UNASSIGNED TAB */}
+        {activeTab === 'unassigned' && (
+          <div className="space-y-4">
+            <div className="bg-gray-800 rounded-lg p-4 flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-bold">Unassigned Leads</h3>
+                <p className="text-sm text-gray-400">Leads that need manual assignment (all campaigns at capacity)</p>
+              </div>
+              <div className="bg-yellow-600 px-4 py-2 rounded-lg font-bold">
+                {unassignedLeads.length} pending
+              </div>
+            </div>
+
+            {unassignedLeads.length === 0 ? (
+              <div className="bg-gray-800 rounded-lg p-8 text-center text-gray-400">
+                No unassigned leads. All leads are being routed automatically.
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {unassignedLeads.map((lead) => (
+                  <div key={lead.id} className="bg-gray-800 rounded-lg p-6 border-l-4 border-yellow-500">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <div>
+                        <div className="text-xs text-gray-400 mb-2">LEAD INFO</div>
+                        <div className="space-y-1">
+                          <div className="font-semibold text-lg">{lead.name}</div>
+                          <div className="text-blue-400">{lead.phone}</div>
+                          <div className="text-gray-400">{lead.email}</div>
+                          <div className="text-sm text-gray-400 mt-2">
+                            {lead.address}, {lead.city}, {lead.county} {lead.zip}
+                          </div>
+                          <div className="flex gap-2 mt-2">
+                            <span className="bg-blue-600/30 text-blue-400 px-2 py-1 rounded text-xs">{lead.job_type}</span>
+                            <span className="bg-gray-600/30 text-gray-400 px-2 py-1 rounded text-xs">{lead.issue}</span>
+                          </div>
+                          <div className="text-xs text-gray-500 mt-2">
+                            Submitted: {new Date(lead.submitted_at).toLocaleString()}
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-400 mb-2">PUSH TO CONTRACTOR</div>
+                        <div className="space-y-2 max-h-48 overflow-y-auto">
+                          {contractors
+                            .filter(c => c.counties?.includes(lead.county))
+                            .map(contractor => (
+                            <button
+                              key={contractor.id}
+                              onClick={() => handleManualPush(lead.id, contractor.id)}
+                              disabled={pushing === lead.id}
+                              className="w-full bg-gray-700 hover:bg-gray-600 disabled:opacity-50 rounded p-3 text-left flex justify-between items-center transition"
+                            >
+                              <div>
+                                <div className="font-medium">{contractor.company_name || contractor.name}</div>
+                                <div className="text-xs text-gray-400">{contractor.email}</div>
+                              </div>
+                              <div className="text-green-400 font-semibold">
+                                {pushing === lead.id ? 'Pushing...' : 'Push'}
+                              </div>
+                            </button>
+                          ))}
+                          {contractors.filter(c => c.counties?.includes(lead.county)).length === 0 && (
+                            <div className="text-yellow-400 text-sm">No contractors serve {lead.county} county</div>
+                          )}
+                        </div>
+                        <div className="mt-3 pt-3 border-t border-gray-700">
+                          <div className="text-xs text-gray-500 mb-2">Or push to any contractor:</div>
+                          <select
+                            className="w-full bg-gray-700 rounded p-2 text-sm"
+                            onChange={(e) => {
+                              if (e.target.value) handleManualPush(lead.id, e.target.value);
+                            }}
+                            disabled={pushing === lead.id}
+                          >
+                            <option value="">Select contractor...</option>
+                            {contractors.map(c => (
+                              <option key={c.id} value={c.id}>
+                                {c.company_name || c.name} ({c.email})
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
