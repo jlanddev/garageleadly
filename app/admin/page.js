@@ -15,6 +15,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
   const [pushing, setPushing] = useState(null);
+  const [expandedLead, setExpandedLead] = useState(null);
 
   useEffect(() => {
     fetchAllData();
@@ -364,44 +365,81 @@ export default function AdminPage() {
                 leads.map((lead) => {
                   const contractor = contractors.find(c => c.id === lead.contractor_id);
                   const transaction = transactions.find(t => t.lead_id === lead.id);
+                  const isExpanded = expandedLead === lead.id;
 
                   return (
-                    <div key={lead.id} className="bg-gray-800 rounded-lg p-6 border-l-4 border-blue-500">
-                      <div className="grid grid-cols-4 gap-6">
-                        <div>
-                          <div className="text-xs text-gray-400 mb-1">TIME</div>
-                          <div className="font-mono text-sm">
-                            {new Date(lead.submitted_at).toLocaleTimeString()}
+                    <div key={lead.id} className="bg-gray-800 rounded-lg border-l-4 border-blue-500 overflow-hidden">
+                      <div
+                        className="p-6 cursor-pointer hover:bg-gray-750"
+                        onClick={() => setExpandedLead(isExpanded ? null : lead.id)}
+                      >
+                        <div className="grid grid-cols-4 gap-6">
+                          <div>
+                            <div className="text-xs text-gray-400 mb-1">TIME</div>
+                            <div className="font-mono text-sm">
+                              {new Date(lead.submitted_at).toLocaleTimeString()}
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-gray-400 mb-1">CUSTOMER</div>
+                            <div className="font-semibold">{lead.name}</div>
+                            <div className="text-xs text-gray-400">{lead.county} • {lead.job_type}</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-gray-400 mb-1">ASSIGNED TO</div>
+                            {contractor ? (
+                              <>
+                                <div className="font-semibold">{contractor.company_name || contractor.name}</div>
+                                <div className="text-xs text-gray-400">{contractor.phone}</div>
+                              </>
+                            ) : (
+                              <div className="text-yellow-400">Pending assignment</div>
+                            )}
+                          </div>
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <div className="text-xs text-gray-400 mb-1">CHARGE</div>
+                              {transaction ? (
+                                <>
+                                  <div className="font-semibold text-green-400">${transaction.amount}</div>
+                                  <div className="text-xs text-gray-400 capitalize">{transaction.status}</div>
+                                </>
+                              ) : (
+                                <div className="text-xs text-gray-400">Processing...</div>
+                              )}
+                            </div>
+                            <div className="text-gray-400 text-xl">{isExpanded ? '▲' : '▼'}</div>
                           </div>
                         </div>
-                        <div>
-                          <div className="text-xs text-gray-400 mb-1">CUSTOMER</div>
-                          <div className="font-semibold">{lead.name}</div>
-                          <div className="text-xs text-gray-400">{lead.county} • {lead.job_type}</div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-gray-400 mb-1">ASSIGNED TO</div>
-                          {contractor ? (
-                            <>
-                              <div className="font-semibold">{contractor.company_name || contractor.name}</div>
-                              <div className="text-xs text-gray-400">{contractor.phone}</div>
-                            </>
-                          ) : (
-                            <div className="text-yellow-400">Pending assignment</div>
-                          )}
-                        </div>
-                        <div>
-                          <div className="text-xs text-gray-400 mb-1">CHARGE</div>
-                          {transaction ? (
-                            <>
-                              <div className="font-semibold text-green-400">${transaction.amount}</div>
-                              <div className="text-xs text-gray-400 capitalize">{transaction.status}</div>
-                            </>
-                          ) : (
-                            <div className="text-xs text-gray-400">Processing...</div>
-                          )}
-                        </div>
                       </div>
+
+                      {isExpanded && (
+                        <div className="bg-gray-700 px-6 py-4 border-t border-gray-600">
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div>
+                              <div className="text-xs text-gray-400 mb-1">PHONE</div>
+                              <div className="text-blue-400 font-medium">{lead.phone}</div>
+                            </div>
+                            <div>
+                              <div className="text-xs text-gray-400 mb-1">EMAIL</div>
+                              <div className="text-sm">{lead.email}</div>
+                            </div>
+                            <div>
+                              <div className="text-xs text-gray-400 mb-1">ADDRESS</div>
+                              <div className="text-sm">{lead.address}</div>
+                              <div className="text-sm text-gray-400">{lead.city}, {lead.county} {lead.zip}</div>
+                            </div>
+                            <div>
+                              <div className="text-xs text-gray-400 mb-1">SERVICE TYPE</div>
+                              <div className="text-sm">{lead.job_type}</div>
+                            </div>
+                          </div>
+                          <div className="mt-4">
+                            <div className="text-xs text-gray-400 mb-1">ISSUE / REQUEST</div>
+                            <div className="bg-gray-800 rounded p-3 text-sm">{lead.issue || 'No details provided'}</div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   );
                 })
